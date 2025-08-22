@@ -214,6 +214,77 @@
       font-size: 0.9rem;
       color: #333;
     }
+    
+    /* CSS mới cho popup đổi mật khẩu */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0,0,0);
+      background-color: rgba(0,0,0,0.4);
+      padding-top: 60px;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .modal-content h3 {
+      text-align: center;
+      margin-top: 0;
+      color: #e63946;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      border-radius: 4px;
+    }
+    
+    .modal-content button {
+      width: 100%;
+      background-color: #e63946;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    .modal-content button:hover {
+      background-color: #d42c38;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -245,6 +316,7 @@
         <button type="submit">Đăng nhập</button>
       </form>
       
+      <!-- Admin Panel -->
       <div id="admin-panel" class="admin-panel">
         <h3>Tạo tài khoản mới</h3>
         <input type="email" id="new-user-email" placeholder="Email người dùng mới" required>
@@ -257,6 +329,19 @@
     <div id="menu" class="grid"></div>
   </div>
 
+  <!-- Thêm modal đổi mật khẩu -->
+  <div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Đổi Mật Khẩu</h3>
+      <input type="password" id="old-password" placeholder="Mật khẩu cũ" required>
+      <input type="password" id="new-password" placeholder="Mật khẩu mới (ít nhất 6 ký tự)" required>
+      <input type="password" id="confirm-new-password" placeholder="Nhập lại mật khẩu mới" required>
+      <button id="submit-change-password">Xác nhận Đổi Mật Khẩu</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
@@ -411,6 +496,81 @@
     const logoutBtn = document.getElementById('logout-btn');
     const changePasswordBtn = document.getElementById('change-password-btn');
 
+    // Thêm các biến mới cho modal
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const oldPasswordInput = document.getElementById('old-password');
+    const newPasswordInput = document.getElementById('new-password');
+    const confirmNewPasswordInput = document.getElementById('confirm-new-password');
+    const submitChangePasswordBtn = document.getElementById('submit-change-password');
+    const closeModalSpan = document.querySelector('.modal .close');
+
+    // Mở modal khi click nút "Đổi mật khẩu"
+    changePasswordBtn.addEventListener('click', () => {
+      changePasswordModal.style.display = 'block';
+    });
+
+    // Đóng modal khi click nút 'x'
+    closeModalSpan.addEventListener('click', () => {
+      changePasswordModal.style.display = 'none';
+      oldPasswordInput.value = '';
+      newPasswordInput.value = '';
+      confirmNewPasswordInput.value = '';
+    });
+    
+    // Đóng modal khi click ra ngoài
+    window.addEventListener('click', (e) => {
+      if (e.target === changePasswordModal) {
+        changePasswordModal.style.display = 'none';
+        oldPasswordInput.value = '';
+        newPasswordInput.value = '';
+        confirmNewPasswordInput.value = '';
+      }
+    });
+
+    // Xử lý đổi mật khẩu
+    submitChangePasswordBtn.addEventListener('click', () => {
+      const oldPassword = oldPasswordInput.value;
+      const newPassword = newPasswordInput.value;
+      const confirmNewPassword = confirmNewPasswordInput.value;
+
+      if (newPassword.length < 6) {
+        alert('Mật khẩu mới phải có ít nhất 6 ký tự.');
+        return;
+      }
+      
+      if (newPassword !== confirmNewPassword) {
+        alert('Mật khẩu mới không khớp. Vui lòng thử lại.');
+        return;
+      }
+      
+      const user = auth.currentUser;
+      if (user) {
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPassword);
+        
+        user.reauthenticateWithCredential(credential)
+          .then(() => {
+            user.updatePassword(newPassword)
+              .then(() => {
+                alert('Đổi mật khẩu thành công!');
+                changePasswordModal.style.display = 'none';
+                oldPasswordInput.value = '';
+                newPasswordInput.value = '';
+                confirmNewPasswordInput.value = '';
+              })
+              .catch(error => {
+                console.error(error);
+                alert('Đổi mật khẩu thất bại: ' + error.message);
+              });
+          })
+          .catch(error => {
+            console.error(error);
+            alert('Mật khẩu cũ không đúng. Vui lòng thử lại.');
+          });
+      } else {
+        alert('Bạn chưa đăng nhập. Vui lòng đăng nhập để thực hiện chức năng này.');
+      }
+    });
+
     // Xử lý đăng nhập
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -433,23 +593,10 @@
       auth.signOut().then(() => {
         console.log('Người dùng đã đăng xuất.');
         alert('Đã đăng xuất.');
+        // Xóa rỗng các trường input sau khi đăng xuất
+        document.getElementById('login-email').value = '';
+        document.getElementById('login-password').value = '';
       });
-    });
-
-    // Xử lý đổi mật khẩu (gửi email reset)
-    changePasswordBtn.addEventListener('click', () => {
-      const user = auth.currentUser;
-      if (user) {
-        auth.sendPasswordResetEmail(user.email)
-          .then(() => {
-            alert('Một email đặt lại mật khẩu đã được gửi đến địa chỉ của bạn.');
-          })
-          .catch(err => {
-            alert('Lỗi: ' + err.message);
-          });
-      } else {
-        alert('Bạn cần đăng nhập để đổi mật khẩu.');
-      }
     });
 
     // Admin: Tạo tài khoản mới
