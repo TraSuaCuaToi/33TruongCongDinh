@@ -467,12 +467,11 @@
             submitBtnText.textContent = "Đang tải lên...";
             submitBtnLoader.style.display = 'block';
 
-            let imageUrl = '';
             try {
                 // Upload image to Firebase Storage
                 const imageRef = ref(storage, `${FIREBASE_APP_ID}/menu_images/${imageFile.name}_${new Date().getTime()}`);
                 const snapshot = await uploadBytes(imageRef, imageFile);
-                imageUrl = await getDownloadURL(snapshot.ref);
+                const imageUrl = await getDownloadURL(snapshot.ref);
 
                 // Add item data to Firestore
                 const newItem = {
@@ -488,7 +487,7 @@
                 hideModal();
             } catch (error) {
                 console.error("Lỗi khi thêm món:", error);
-                showToast("Có lỗi xảy ra khi thêm món. Vui lòng thử lại.", "error");
+                showToast("Có lỗi xảy ra khi thêm món. Vui lòng thử lại. Lỗi: " + error.message, "error");
             } finally {
                 submitBtnText.textContent = "Thêm món";
                 submitBtnLoader.style.display = 'none';
