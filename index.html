@@ -997,12 +997,7 @@
     submitOrderCartBtn.addEventListener('click', async () => {
       const phoneNumber = phoneNumberInput.value.trim();
       const notes = notesInput.value.trim();
-
       const user = auth.currentUser;
-      if (!user) {
-        showCustomAlert('Vui lòng đăng nhập để đặt hàng.');
-        return;
-      }
       
       if (cart.length === 0) {
           showCustomAlert('Giỏ hàng trống, vui lòng chọn món trước khi đặt.');
@@ -1015,7 +1010,7 @@
       }
 
       const newOrder = {
-          userId: user.uid,
+          userId: user ? user.uid : 'anonymous',
           phoneNumber: phoneNumber,
           items: cart,
           notes: notes,
@@ -1175,13 +1170,14 @@
         userEmailDisplay.textContent = user.email;
         orderListContainer.style.display = 'block';
         
+        // Everyone who is logged in can see the order list
         if (user.email === 'admin@myapp.com') {
           createUserBtnModal.style.display = 'block';
-          listenForOrders(ordersCollection);
         } else {
           createUserBtnModal.style.display = 'none';
-          orderList.innerHTML = 'Bạn không có quyền xem danh sách đơn hàng.';
         }
+        listenForOrders(ordersCollection);
+
       } else {
         authStatus.textContent = 'Bạn chưa đăng nhập.';
         loginForm.style.display = 'flex';
