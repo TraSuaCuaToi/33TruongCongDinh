@@ -11,15 +11,15 @@
       background-color: white;
       padding: 0;
       margin: 0;
+      overflow-x: hidden; /* NGĂN CHẶN THANH CUỘN NGANG */
     }
 
-    /* Bố cục cố định, không co giãn */
+    /* Bố cục chính của ứng dụng - sử dụng flexbox linh hoạt */
     .app-container {
       width: 100%;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden; /* Ngăn cuộn ngang và cuộn dọc không mong muốn */
     }
 
     /* Header cố định trên cùng */
@@ -28,8 +28,8 @@
       background-color: #f8f8f8;
       padding: 10px 20px;
       display: flex;
-      justify-content: flex-end;
-      gap: 10px;
+      justify-content: space-between; /* Đẩy hai button về hai phía */
+      align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       flex-shrink: 0;
     }
@@ -70,17 +70,24 @@
     .content-container {
       display: flex;
       flex-grow: 1;
-      flex-shrink: 1;
     }
 
-    /* Sidebar cố định bên trái */
+    /* Sidebar di động, mặc định ẩn */
     .sidebar {
-      width: 200px;
+      position: fixed;
+      left: -250px; /* Ẩn sidebar bằng cách đẩy ra ngoài màn hình */
+      top: 0;
+      bottom: 0;
+      width: 250px;
       background: #f8f8f8;
       padding: 20px;
-      box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+      box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+      transition: left 0.3s ease-in-out; /* Tạo hiệu ứng trượt */
+      z-index: 1000;
       overflow-y: auto;
-      flex-shrink: 0;
+    }
+    .sidebar.open {
+      left: 0; /* Hiện sidebar khi có class 'open' */
     }
     .sidebar h3 {
       margin-top: 0;
@@ -102,6 +109,31 @@
       background: #e63946;
       color: white;
     }
+    .sidebar-close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    /* Overlay khi sidebar mở */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+    .overlay.show {
+      display: block;
+    }
 
     /* Nội dung chính ở giữa, có thể cuộn */
     .main {
@@ -110,8 +142,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow-y: auto; /* Cho phép cuộn dọc */
-      overflow-x: hidden; /* Ngăn cuộn ngang */
+      overflow-y: auto;
     }
     .grid {
       display: grid;
@@ -432,8 +463,11 @@
 <body>
   <div class="app-container">
     <div class="header">
-        <button id="auth-button">Đăng nhập</button>
-        <button id="cart-button">Giỏ Hàng (<span id="cart-count">0</span>)</button>
+        <button id="menu-toggle-btn">Menu</button>
+        <div>
+          <button id="auth-button">Đăng nhập</button>
+          <button id="cart-button">Giỏ Hàng (<span id="cart-count">0</span>)</button>
+        </div>
     </div>
     
     <div class="store-info-section">
@@ -443,12 +477,16 @@
     </div>
     
     <div class="content-container">
-        <!-- Sidebar luôn hiển thị -->
+        <!-- Sidebar di động, mặc định ẩn -->
         <div class="sidebar" id="group-sidebar">
+            <button class="sidebar-close-btn">&times;</button>
             <h3>Nhóm món</h3>
             <div id="group-list"></div>
         </div>
         
+        <!-- Lớp phủ khi menu mở -->
+        <div id="overlay" class="overlay"></div>
+
         <div class="main">
             <h2>Menu Trà Sữa</h2>
             <div id="menu" class="grid"></div>
@@ -556,7 +594,7 @@
 
   <script>
     const MENU = [
-      // món 1
+      // Món 1: Trà sữa
       {
         img: "Trà sữa 1.png",
         name: "Trà Sữa Dâu",
@@ -568,7 +606,7 @@
         ],
         desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
       },
-      // món 2
+      // Món 2: Matcha
       {
         img: "Trà sữa 2.png",
         name: "Matcha latte",
@@ -578,9 +616,9 @@
           { size: "L", price: 30000 },
           { size: "XL", price: 32000 },
         ],
-        desc: "Matcha Nhật Bản thanh mát.Kết hợp sữa tươi béo nhẹ, thơm dịu."
+        desc: "Matcha Nhật Bản thanh mát. Kết hợp sữa tươi béo nhẹ, thơm dịu."
       },
-      // món 3
+      // Món 3: Topping
       {
         img: "Topping 1.png",
         name: "Topping Dừa",
@@ -588,7 +626,7 @@
         options: [ { size: "", price: 7000 } ],
         desc: "Ngon giòn béo nhẹ."
       },
-      // món 4
+      // Món 4: Topping
       {
         img: "Topping 2.png",
         name: "Topping Nha Đam",
@@ -596,7 +634,7 @@
         options: [ { size: "", price: 5000 } ],
         desc: "Mát lạnh, giòn sần sật."
       },
-      // món 5
+      // Món 5: Trà sữa
       {
         img: "Trà sữa 3.png",
         name: "Sô-cô-la sữa",
@@ -608,13 +646,13 @@
         ],
         desc: "Sô-cô-la ngọt ngào, hòa quyện cùng sữa tươi."
       },
-      // món 6
+      // Món 6: Topping
       {
         img: "Topping 3.png",
         name: "Topping A",
         group: "Topping",
         options: [ { size: "", price: 7000 } ],
-        desc: "Mô tả cái gì đó ...về topping A.."
+        desc: "Mô tả cái gì đó... về topping A..."
       }
     ];
 
@@ -636,19 +674,24 @@
     const orderListContainer = document.getElementById("order-list-container");
     const orderList = document.getElementById("order-list");
     const authButton = document.getElementById('auth-button');
-
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const sidebar = document.getElementById('group-sidebar');
+    const overlay = document.getElementById('overlay');
+    const sidebarCloseBtn = document.querySelector('.sidebar-close-btn');
 
     const groups = [...new Set(MENU.map(item => item.group))];
     
     // Render groups cho sidebar
     groups.forEach(group => {
-      const createButton = (container) => {
-        const btn = document.createElement("button");
-        btn.textContent = group;
-        btn.onclick = () => renderMenu(group);
-        container.appendChild(btn);
+      const btn = document.createElement("button");
+      btn.textContent = group;
+      btn.onclick = () => {
+          renderMenu(group);
+          // Ẩn sidebar sau khi chọn
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
       };
-      createButton(groupList);
+      groupList.appendChild(btn);
     });
 
     // Tạo danh sách topping có thể chọn
@@ -785,6 +828,23 @@
     cartButton.addEventListener('click', () => {
       renderCart();
       cartModal.style.display = 'block';
+    });
+
+    // Mở/đóng sidebar
+    menuToggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+    });
+
+    // Đóng sidebar khi click vào nút close hoặc lớp phủ
+    sidebarCloseBtn.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
     });
     
     // Xử lý khi click vào nút "Thêm vào giỏ" trên trang chính
