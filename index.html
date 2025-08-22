@@ -457,6 +457,9 @@
 
             if (!name || !group || isNaN(price) || !imageFile) {
                 showToast("Vui lòng nhập đầy đủ thông tin và chọn ảnh.", "error");
+                // Restore button state
+                submitBtnText.textContent = "Thêm món";
+                submitBtnLoader.style.display = 'none';
                 return;
             }
 
