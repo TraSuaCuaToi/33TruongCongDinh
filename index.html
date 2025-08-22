@@ -324,8 +324,12 @@
       border-radius: 4px;
       width: 100%;
     }
-    .modal-content button:hover {
+    .modal-content button:hover:not(:disabled) {
       background-color: #d42c38;
+    }
+    .modal-content button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
     }
     .modal-footer {
       text-align: right;
@@ -597,68 +601,68 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
 
   <script>
-   const MENU = [
-      // Món 1: Trà sữa
-      {
-        img: "Trà sữa 1.png",
-        name: "Trà Sữa Dâu",
-        group: "Trà Sữa",
-        options: [
-          { size: "M", price: 10000 },
-          { size: "L", price: 12000 },
-          { size: "XL", price: 15000 },
-        ],
-        desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
-      },
-      // Món 2: Matcha
-      {
-        img: "Trà sữa 2.png",
-        name: "Matcha latte",
-        group: "Trà Sữa",
-        options: [
-          { size: "M", price: 29000 },
-          { size: "L", price: 30000 },
-          { size: "XL", price: 32000 },
-        ],
-        desc: "Matcha Nhật Bản thanh mát. Kết hợp sữa tươi béo nhẹ, thơm dịu."
-      },
-      // Món 3: Topping
-      {
-        img: "Topping 1.png",
-        name: "Topping Dừa",
-        group: "Topping",
-        options: [ { size: "", price: 7000 } ],
-        desc: "Ngon giòn béo nhẹ."
-      },
-      // Món 4: Topping
-      {
-        img: "Topping 2.png",
-        name: "Topping Nha Đam",
-        group: "Topping",
-        options: [ { size: "", price: 5000 } ],
-        desc: "Mát lạnh, giòn sần sật."
-      },
-      // Món 5: Trà sữa
-      {
-        img: "Trà sữa 3.png",
-        name: "Sô-cô-la sữa",
-        group: "Trà Sữa",
-        options: [
-          { size: "M", price: 25000 },
-          { size: "L", price: 27000 },
-          { size: "XL", price: 30000 },
-        ],
-        desc: "Sô-cô-la ngọt ngào, hòa quyện cùng sữa tươi."
-      },
-      // Món 6: Topping
-      {
-        img: "Topping 3.png",
-        name: "Topping A",
-        group: "Topping",
-        options: [ { size: "", price: 7000 } ],
-        desc: "Mô tả cái gì đó... về topping A..."
-      }
-    ];
+    const MENU = [
+        // Món 1: Trà sữa
+        {
+          img: "Trà sữa 1.png",
+          name: "Trà Sữa Dâu",
+          group: "Trà Sữa",
+          options: [
+            { size: "M", price: 10000 },
+            { size: "L", price: 12000 },
+            { size: "XL", price: 15000 },
+          ],
+          desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
+        },
+        // Món 2: Matcha
+        {
+          img: "Trà sữa 2.png",
+          name: "Matcha latte",
+          group: "Trà Sữa",
+          options: [
+            { size: "M", price: 29000 },
+            { size: "L", price: 30000 },
+            { size: "XL", price: 32000 },
+          ],
+          desc: "Matcha Nhật Bản thanh mát. Kết hợp sữa tươi béo nhẹ, thơm dịu."
+        },
+        // Món 3: Topping
+        {
+          img: "Topping 1.png",
+          name: "Topping Dừa",
+          group: "Topping",
+          options: [ { size: "", price: 7000 } ],
+          desc: "Ngon giòn béo nhẹ."
+        },
+        // Món 4: Topping
+        {
+          img: "Topping 2.png",
+          name: "Topping Nha Đam",
+          group: "Topping",
+          options: [ { size: "", price: 5000 } ],
+          desc: "Mát lạnh, giòn sần sật."
+        },
+        // Món 5: Trà sữa
+        {
+          img: "Trà sữa 3.png",
+          name: "Sô-cô-la sữa",
+          group: "Trà Sữa",
+          options: [
+            { size: "M", price: 25000 },
+            { size: "L", price: 27000 },
+            { size: "XL", price: 30000 },
+          ],
+          desc: "Sô-cô-la ngọt ngào, hòa quyện cùng sữa tươi."
+        },
+        // Món 6: Topping
+        {
+          img: "Topping 3.png",
+          name: "Topping A",
+          group: "Topping",
+          options: [ { size: "", price: 7000 } ],
+          desc: "Mô tả cái gì đó... về topping A..."
+        }
+      ];
 
     const IMAGE_BASE = "./";
     let cart = [];
@@ -725,7 +729,7 @@
         });
 
         card.innerHTML = `
-          <img src="${item.img}" alt="${item.name}">
+          <img src="${IMAGE_BASE + item.img}" alt="${item.name}" onerror="this.src='https://placehold.co/400x300/F0F0F0/4F4F4F?text=No+Image';">
           <div class="info">
             <div class="name">${item.name}</div>
             ${optionsHTML}
@@ -994,7 +998,10 @@
     }
     
     // Handle order submission
+    let isSubmitting = false; // Flag to prevent multiple submissions
     submitOrderCartBtn.addEventListener('click', async () => {
+      if (isSubmitting) return; // If already submitting, do nothing
+
       const phoneNumber = phoneNumberInput.value.trim();
       const notes = notesInput.value.trim();
       const user = auth.currentUser;
@@ -1008,6 +1015,11 @@
           showCustomAlert('Vui lòng nhập 5 chữ số cuối của số điện thoại.');
           return;
       }
+
+      // Disable the button to prevent multiple clicks
+      submitOrderCartBtn.disabled = true;
+      submitOrderCartBtn.textContent = 'Đang xử lý...';
+      isSubmitting = true;
 
       const newOrder = {
           userId: user ? user.uid : 'anonymous',
@@ -1029,6 +1041,13 @@
       } catch (error) {
           console.error("Lỗi khi thêm đơn hàng: ", error);
           showCustomAlert('Gửi đơn hàng thất bại. Vui lòng thử lại.');
+      } finally {
+          // Re-enable the button after 3 seconds, regardless of success or failure
+          setTimeout(() => {
+              submitOrderCartBtn.disabled = false;
+              submitOrderCartBtn.textContent = 'Xác nhận Đặt Hàng';
+              isSubmitting = false;
+          }, 3000);
       }
     });
 
@@ -1275,4 +1294,3 @@
   </script>
 </body>
 </html>
-
