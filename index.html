@@ -2,71 +2,28 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menu Trà Sữa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: white;
-      padding:20px;
-      position: relative;
-      min-height: 100vh;
-    }
-    .grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
-      gap:18px;
-      background-color: #ffe4e9; /* Nền màu hồng nhạt */
-      padding: 20px;
-      border-radius: 12px;
-    }
-    .card {
-      background:#fff;
-      border:1px solid #ddd;
-      border-radius:8px;
-      overflow:hidden;
-      box-shadow:0 2px 6px rgba(0,0,0,.1);
-      display:flex;
-      flex-direction:column;
-    }
-    .card img {
-      width:100%;
-      height:160px;
-      object-fit:cover;
-      display:block;
-    }
-    .info {
-      padding:12px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .name {
-      font-weight:bold;
-      font-size:16px;
-    }
-    .meta {
-      font-size:14px;
-      color:#555;
-    }
-    .price {
-      font-weight:bold;
-      color:#e63946;
-    }
-    .desc {
-      font-size:14px;
-      color:#444;
-      line-height:1.4;
-      white-space:pre-line;
-      margin-top:6px;
+      font-family: 'Inter', sans-serif;
+      background-color: #fce4ec; /* Light pink background */
     }
 
-    /* Keyframes cho hiệu ứng hoa rơi */
+    .font-dancing-script {
+      font-family: 'Dancing Script', cursive;
+    }
+
+    /* Falling elements effect */
     @keyframes fall {
       0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
       10% { opacity: 1; }
       100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
     }
-
     .falling-element {
       position: fixed;
       top: 0;
@@ -76,169 +33,151 @@
       z-index: 100;
       animation: fall linear infinite;
     }
-
-    /* CSS cho tên và địa chỉ quán */
-    .store-info {
-      text-align: center;
-      margin-bottom: 30px;
-      color: #e63949;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    .custom-file-input::-webkit-file-upload-button {
+      visibility: hidden;
     }
-
-.store-name {
-  font-family: 'Dancing Script', cursive;
-  font-size: 5rem;
-  color: #8e44ad; /* đổi màu */
-  margin: 0;
-  line-height: 1.2;
-}
-
-
-    .store-address {
-      font-size: 1.2rem;
-      margin-top: 5px;
-      color: #555;
+    .custom-file-input::before {
+      content: 'Chọn ảnh';
+      display: inline-block;
+      background: linear-gradient(top, #f9f9f9, #e3e3e3);
+      border: 1px solid #999;
+      border-radius: 3px;
+      padding: 5px 8px;
+      outline: none;
+      white-space: nowrap;
+      -webkit-user-select: none;
+      cursor: pointer;
+      text-shadow: 1px 1px #fff;
+      font-weight: 700;
+      font-size: 10pt;
     }
-
-    /* Tiêu đề menu */
-    h2 {
-      text-align: center;
-      color: #e63946;
-      margin: 20px 0;
-      font-size: 2.5rem;
-      font-family: 'Dancing Script', cursive;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    .custom-file-input:hover::before {
+      border-color: black;
+    }
+    .custom-file-input:active::before {
+      background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+    }
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 4px solid #e63946;
+      width: 24px;
+      height: 24px;
+      -webkit-animation: spin 2s linear infinite; /* Safari */
+      animation: spin 2s linear infinite;
+      display: none;
+    }
+    /* Safari */
+    @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
-<body>
-  <div id="falling-container"></div>
+<body class="flex min-h-screen">
+  <!-- Falling elements container -->
+  <div id="falling-container" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
 
-  <div class="store-info">
-    <h1 class="store-name">Trà Sữa Của Tôi</h1>     <!-- Đây là tên quán của bạn,có thể đổi tại đây. chỉ đổi chữ Trà Sữa Mơ Màng thanh tên quán bạn  -->
-    <p class="store-address">33 Tôn Đức Thắng, Đà Nẵng</p> <!-- Đây là địa chỉ quán của bạn,  -->
+  <!-- Main Container -->
+  <div class="flex flex-col md:flex-row w-full max-w-7xl mx-auto my-8 p-4 bg-white rounded-xl shadow-xl">
+
+    <!-- Sidebar -->
+    <div class="w-full md:w-64 p-6 bg-pink-50 rounded-lg shadow-inner md:mr-6 mb-6 md:mb-0 flex flex-col items-center">
+      <div id="auth-status" class="w-full text-center mb-4">
+        <!-- Auth status will be rendered here -->
+      </div>
+      <div id="auth-ui" class="w-full">
+        <!-- Auth UI will be rendered here -->
+      </div>
+      
+      <h3 class="font-bold text-lg text-rose-600 mb-2 mt-4">Nhóm Món</h3>
+      <div id="group-list" class="w-full flex flex-col space-y-2">
+        <!-- Group buttons will be rendered here -->
+      </div>
+
+      <button id="add-item-btn" class="mt-4 w-full py-2 px-4 bg-purple-500 text-white font-bold rounded-lg shadow hover:bg-purple-600 transition-colors hidden">
+        Thêm Món
+      </button>
+
+      <button id="show-log-btn" class="mt-2 w-full py-2 px-4 bg-rose-500 text-white font-bold rounded-lg shadow hover:bg-rose-600 transition-colors hidden">
+        Xem Đơn Hàng
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-4">
+      <div class="store-info text-center mb-8">
+        <h1 class="font-dancing-script text-6xl text-purple-700 font-bold leading-tight">Trà Sữa Của Tôi</h1>
+        <p class="text-gray-600 text-lg mt-2">33 Tôn Đức Thắng, Đà Nẵng</p>
+      </div>
+
+      <h2 class="font-dancing-script text-4xl text-rose-600 text-center mb-6 uppercase tracking-wider">Menu Trà Sữa</h2>
+
+      <div id="menu" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-pink-100 p-6 rounded-xl">
+        <!-- Menu items will be rendered here -->
+      </div>
+    </div>
   </div>
 
-  <h2>Menu Trà Sữa</h2>	
-  <div id="menu" class="grid"></div>
+  <!-- Modal for auth and logs -->
+  <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-md transform transition-transform duration-300 scale-95">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="modal-title" class="text-xl font-bold text-gray-800"></h3>
+        <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+      </div>
+      <div id="modal-content">
+        <!-- Modal content will be rendered here -->
+      </div>
+    </div>
+  </div>
 
-  <script>
-    // 🔹 Khai báo menu với nhiều size và giá
-    const MENU = [
-      {
-        img: "Trà sữa 1.png",
-        name: "Trà Sữa Dâu",
-        options: [
-          { size: "M", price: 10000 },
-          { size: "L", price: 12000 },
-          { size: "XL", price: 15000 },
-        ],
-        desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
-      },
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, addDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
+    // --- Firebase Setup ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyARctBmqbmoL9KPT2snk7aKebxJ-SKoMbQ",
+      authDomain: "trasua-4a1d9.firebaseapp.com",
+      projectId: "trasua-4a1d9",
+      storageBucket: "trasua-4a1d9.firebasestorage.app",
+      messagingSenderId: "210496424940",
+      appId: "1:210496424940:web:b84d326448cc7fcb790ec9",
+      measurementId: "G-9R75DB010Y"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+    
+    // --- Global Variables ---
+    let userId = null;
+    let userRole = 'guest';
+    const FIREBASE_APP_ID = firebaseConfig.appId;
+    const PUBLIC_ORDERS_PATH = `artifacts/${FIREBASE_APP_ID}/public/data/orders`;
+    const PUBLIC_MENU_PATH = `artifacts/${FIREBASE_APP_ID}/public/data/menu`;
 
-      {
-        img: "Trà sữa 2.png",
-        name: "Matcha latte",
-        options: [
-          { size: "M", price: 29000 },
-          { size: "L", price: 30000 },
-          { size: "XL", price: 32000 },
-        ],
-        desc: "Matcha Nhật Bản thanh mát.Kết hợp sữa tươi béo nhẹ, thơm dịu."
-      },
+    // --- DOM Elements ---
+    const grid = document.getElementById("menu");
+    const groupList = document.getElementById("group-list");
+    const authStatusDiv = document.getElementById("auth-status");
+    const authUIDiv = document.getElementById("auth-ui");
+    const showLogBtn = document.getElementById("show-log-btn");
+    const addItemBtn = document.getElementById("add-item-btn");
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modal-title");
+    const modalContent = document.getElementById("modal-content");
+    const closeModalBtn = document.getElementById("close-modal-btn");
 
-
-
-
-
-    {
-        img: "Topping 1.png",
-        name: "Topping Dừa",
-        options: [
-            { size: "", price: 7000 },
-          //{ size: "L", price: 32000 },
-          //{ size: "XL", price: 35000 },
-        ],
-        desc: "Trà Ô Long đậm vị, hậu ngọt thanh.Phù hợp cho người thích vị trà rõ rệt."
-      },
-////////////////////////////////////////////////////////////////////////////////////
-
-    {
-        img: "Topping 2.png",
-        name: "Topping Nha Đam",
-        options: [
-          { size: "", price: 5000 }, // topping không có size thì bỏ size bằng 2 dấu //
-          //{ size: "L", price: 32000 },
-          //{ size: "XL", price: 35000 }
-        ],
-        desc: "Mô tả cái gi đó ......"
-      },
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-      {
-        img: "Trà sữa 3.png",
-        name: "Sô-cô-la sữa",
-        options: [
-          { size: "M", price: 25000 },
-          { size: "L", price: 27000 },
-          { size: "XL", price: 30000 },
-        ],
-        desc: "Sô-cô-la ngọt ngào, hòa quyện cùng sữa tươi.Thức uống dành cho tín đồ hảo ngọt."
-      },
-////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////bắt đâu thêm món mới ở đây///////////////////////////////////////////
-// copy cả cụm trên  đoạn giữa các dấu //////////// 
-// img: "Topping 2.png",         đây là tên ảnh, ghi tên đúng 100% với ảnh lưu trên máy
-// name: "Topping Nha Đam",      tên sẽ hiển thi lên web   nhớ ghi giũa dấu " "
-//        options: [  .....],  trong này là khai size. nếu không có size thi không cần khai.không khai báo nhưng không xóa options: [  .....],  /bên trong để trống
-// desc: "Mô tả cái gi đó ......"  mô tả thêm về món
-// Lưu ý copy nguyên rồi sủa theo đúng cấu trúc. nhớ kĩ không xóa các dấu , "" [ ]  vân vân.  chi thay đổi đúng cái bạn cần.
-
-
-      {
-        img: "Trà sữa 4.png",
-        name: "Sô-cô-la dâu",
-        options: [
-          { size: "M", price: 25000 },
-          { size: "L", price: 27000 },
-         // { size: "XL", price: 30000 },  // khong co size thi bỏ ra 
-	//{ size: "XXL", price: 50000 },
-        ],
-        desc: "Sô-cô-la ngọt ngào,mô tả cai gi đó ."
-      },
-
-// thêm topping
-
-    {
-        img: "Topping 3.png",
-        name: "Topping A",
-        options: [
-          { size: "", price: 7000 }, // topping không có size thì bỏ size bằng 2 dấu //
-          //{ size: "L", price: 32000 },
-          //{ size: "XL", price: 35000 }
-        ],
-        desc: "Mô tả cái gi đó ...vê topping A.."
-      },
-
-
-
-
-
-
-
-
-
-    ];
-    const IMAGE_BASE = "./"; // ảnh để chung folder với index.html
-
-    /**
-     * Tạo màu pastel ngẫu nhiên
-     */
+    // --- Helper Functions ---
     function getRandomPastelColor() {
       const hue = Math.floor(Math.random() * 360);
       const saturation = 70 + Math.random() * 20;
@@ -246,51 +185,387 @@
       return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     }
 
-    const grid = document.getElementById("menu");
-    MENU.forEach(item => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.style.backgroundColor = getRandomPastelColor();
-
-      // Tạo danh sách size + giá
-      let optionsHTML = "";
-      item.options.forEach(opt => {
-        optionsHTML += `<div class="meta">Size ${opt.size} - <span class="price">${opt.price.toLocaleString('vi-VN')}₫</span></div>`;
-      });
-
-      card.innerHTML = `
-        <img src="${IMAGE_BASE + item.img}" alt="${item.name}">
-        <div class="info">
-          <div class="name">${item.name}</div>
-          ${optionsHTML}
-          <div class="desc">${item.desc || ""}</div>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-
-    // === Hiệu ứng hoa rơi ===
-    const fallingContainer = document.getElementById("falling-container");
-    const symbols = ['🌸', '🌼', '🌺', '✨'];
-
-    function createFallingElement() {
-      const element = document.createElement('div');
-      element.className = 'falling-element';
-      element.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-      element.style.left = `${Math.random() * 100}vw`;
-      element.style.animationDuration = `${Math.random() * 5 + 5}s`;
-      element.style.animationDelay = `-${Math.random() * 5}s`;
-      fallingContainer.appendChild(element);
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 p-4 rounded-lg text-white shadow-lg transition-transform transform duration-300 translate-y-full z-50`;
+      if (type === 'success') {
+        toast.style.backgroundColor = 'rgba(76, 175, 80, 0.9)';
+      } else {
+        toast.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
+      }
+      toast.textContent = message;
+      document.body.appendChild(toast);
 
       setTimeout(() => {
-        element.remove();
-      }, 10000);
+        toast.style.transform = 'translateY(0)';
+      }, 10);
+
+      setTimeout(() => {
+        toast.style.transform = 'translateY(150%)';
+        setTimeout(() => toast.remove(), 500);
+      }, 3000);
     }
 
-    for (let i = 0; i < 30; i++) {
-        createFallingElement();
+    function showModal(title, content) {
+      modalTitle.textContent = title;
+      modalContent.innerHTML = content;
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('.bg-white').classList.remove('scale-95');
     }
-    setInterval(createFallingElement, 1000); // tạo chậm hơn để nhẹ trang
+
+    function hideModal() {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('.bg-white').classList.add('scale-95');
+    }
+    
+    // --- Auth UI ---
+    function renderAuthUI() {
+        authStatusDiv.innerHTML = `<p class="font-bold text-gray-800">Bạn chưa đăng nhập.</p>`;
+        authUIDiv.innerHTML = `
+            <form id="auth-form" class="space-y-4">
+                <input id="email-input" type="email" placeholder="Email" class="w-full p-2 border border-gray-300 rounded-lg">
+                <input id="password-input" type="password" placeholder="Mật khẩu" class="w-full p-2 border border-gray-300 rounded-lg">
+                <div class="flex space-x-2">
+                    <button type="submit" id="login-btn" class="flex-1 py-2 px-4 bg-rose-500 text-white font-bold rounded-lg shadow hover:bg-rose-600 transition-colors">Đăng Nhập</button>
+                    <button type="button" id="register-btn" class="flex-1 py-2 px-4 bg-purple-500 text-white font-bold rounded-lg shadow hover:bg-purple-600 transition-colors">Đăng Ký</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showToast("Đăng nhập thành công!", "success");
+            } catch (error) {
+                console.error("Lỗi đăng nhập:", error);
+                showToast("Lỗi: " + error.message, "error");
+            }
+        });
+        document.getElementById('register-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showToast("Đăng ký thành công!", "success");
+            } catch (error) {
+                console.error("Lỗi đăng ký:", error);
+                showToast("Lỗi: " + error.message, "error");
+            }
+        });
+    }
+
+    // --- User UI ---
+    function renderUserUI(user) {
+        authStatusDiv.innerHTML = `
+            <div class="p-2 bg-purple-100 rounded-lg">
+                <p class="font-bold text-gray-800">Xin chào!</p>
+                <p class="text-sm text-gray-600 truncate">${user.email}</p>
+                <p class="text-xs text-gray-500 mt-1">UID: ${user.uid}</p>
+            </div>
+        `;
+        authUIDiv.innerHTML = `
+            <button id="logout-btn" class="w-full py-2 px-4 bg-red-500 text-white font-bold rounded-lg shadow hover:bg-red-600 transition-colors">Đăng Xuất</button>
+        `;
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await signOut(auth);
+            showToast("Đã đăng xuất.", "success");
+        });
+        showLogBtn.classList.remove('hidden');
+        addItemBtn.classList.remove('hidden');
+    }
+
+    // --- Render Menu & Handle Order ---
+    let menuData = [];
+    function renderMenu(group) {
+      grid.innerHTML = "";
+      const filteredItems = menuData.filter(item => item.group === group);
+      if (filteredItems.length === 0) {
+        grid.innerHTML = `<p class="text-center text-gray-500 w-full col-span-full">Chưa có món nào trong nhóm này.</p>`;
+      } else {
+        filteredItems.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "card bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-xl transition-shadow";
+          card.style.backgroundColor = getRandomPastelColor();
+
+          let optionsHTML = "";
+          item.options.forEach((opt, index) => {
+            optionsHTML += `
+              <div class="meta text-sm text-gray-600">
+                ${opt.size ? `Size ${opt.size} - ` : ""}
+                <span class="price font-bold text-rose-600">${opt.price.toLocaleString('vi-VN')}₫</span>
+                <button class="add-to-cart-btn ml-2 p-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600 transition-colors" data-item-name="${item.name}" data-option-index="${index}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </button>
+              </div>`;
+          });
+
+          card.innerHTML = `
+            <img src="${item.img}" alt="${item.name}" class="w-full h-40 object-cover">
+            <div class="p-4 flex flex-col flex-grow">
+              <div class="font-bold text-base text-gray-800">${item.name}</div>
+              <div class="mt-2 space-y-1">
+                ${optionsHTML}
+              </div>
+              <div class="desc text-sm text-gray-500 mt-2 flex-grow">${item.desc || ""}</div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const name = e.currentTarget.dataset.itemName;
+            const optionIndex = e.currentTarget.dataset.optionIndex;
+            const item = menuData.find(m => m.name === name);
+            const option = item.options[optionIndex];
+
+            const order = {
+              userId: userId,
+              itemName: name,
+              size: option.size,
+              price: option.price,
+              timestamp: new Date(),
+            };
+
+            if (userRole !== 'guest') {
+              try {
+                const ordersCollection = collection(db, PUBLIC_ORDERS_PATH);
+                await addDoc(ordersCollection, order);
+                showToast("Đã thêm món vào đơn hàng và lưu thành công!");
+              } catch (error) {
+                console.error("Lỗi khi lưu đơn hàng:", error);
+                showToast("Có lỗi xảy ra khi lưu đơn hàng.", "error");
+              }
+            } else {
+              showToast("Vui lòng đăng nhập để đặt món.", "error");
+            }
+          });
+        });
+      }
+    }
+
+    // --- Render Logs ---
+    async function renderOrdersLog() {
+      if (userRole === 'guest') return;
+
+      let orders = [];
+      try {
+        if (userRole === 'admin') {
+          const q = query(collection(db, PUBLIC_ORDERS_PATH));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach(doc => {
+            orders.push({ id: doc.id, ...doc.data() });
+          });
+        } else {
+          const q = query(collection(db, PUBLIC_ORDERS_PATH), where("userId", "==", userId));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach(doc => {
+            orders.push({ id: doc.id, ...doc.data() });
+          });
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy đơn hàng:", error);
+        showModal("Lỗi", `<p class="text-red-500">Không thể lấy dữ liệu đơn hàng. Vui lòng kiểm tra kết nối.</p>`);
+        return;
+      }
+
+      let logHTML = `
+        <div class="space-y-4">
+          ${orders.length === 0 ? '<p class="text-center text-gray-500">Chưa có đơn hàng nào.</p>' : ''}
+          ${orders.map(order => `
+            <div class="p-4 bg-pink-100 rounded-lg shadow">
+              <p class="font-bold text-rose-600">${order.itemName} ${order.size ? `(Size: ${order.size})` : ''}</p>
+              <p class="text-sm text-gray-700">Giá: ${order.price.toLocaleString('vi-VN')}₫</p>
+              <p class="text-xs text-gray-500">Thời gian: ${order.timestamp.toDate().toLocaleString('vi-VN')}</p>
+              ${userRole === 'admin' ? `<p class="text-xs text-gray-500">Khách hàng: ${order.userId}</p>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      showModal("Lịch Sử Đơn Hàng", logHTML);
+    }
+    
+    // --- Add Item Modal ---
+    function renderAddItemModal() {
+        const modalContentHTML = `
+            <form id="add-item-form" class="space-y-4">
+                <div>
+                    <label for="item-name" class="block text-sm font-medium text-gray-700">Tên món</label>
+                    <input type="text" id="item-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label for="item-desc" class="block text-sm font-medium text-gray-700">Mô tả</label>
+                    <textarea id="item-desc" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
+                </div>
+                <div>
+                    <label for="item-group" class="block text-sm font-medium text-gray-700">Nhóm</label>
+                    <input type="text" id="item-group" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label for="item-price" class="block text-sm font-medium text-gray-700">Giá</label>
+                    <input type="number" id="item-price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label for="item-size" class="block text-sm font-medium text-gray-700">Size (tùy chọn)</label>
+                    <input type="text" id="item-size" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label for="item-image" class="block text-sm font-medium text-gray-700">Ảnh món ăn</label>
+                    <input type="file" id="item-image" accept="image/*" class="mt-1 block w-full custom-file-input">
+                    <img id="image-preview" src="#" alt="Image Preview" class="mt-2 w-32 h-32 object-cover rounded-md hidden">
+                </div>
+                <button type="submit" class="w-full py-2 px-4 bg-green-500 text-white font-bold rounded-lg shadow hover:bg-green-600 transition-colors flex items-center justify-center">
+                    <span id="submit-text">Thêm món</span>
+                    <div id="submit-loader" class="loader ml-2"></div>
+                </button>
+            </form>
+        `;
+        showModal("Thêm Món Mới", modalContentHTML);
+
+        const form = document.getElementById('add-item-form');
+        const imageInput = document.getElementById('item-image');
+        const imagePreview = document.getElementById('image-preview');
+        const submitBtnText = document.getElementById('submit-text');
+        const submitBtnLoader = document.getElementById('submit-loader');
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('hidden');
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('item-name').value;
+            const desc = document.getElementById('item-desc').value;
+            const group = document.getElementById('item-group').value;
+            const price = parseFloat(document.getElementById('item-price').value);
+            const size = document.getElementById('item-size').value;
+            const imageFile = imageInput.files[0];
+
+            if (!name || !group || isNaN(price) || !imageFile) {
+                showToast("Vui lòng nhập đầy đủ thông tin và chọn ảnh.", "error");
+                return;
+            }
+
+            // Show loading state
+            submitBtnText.textContent = "Đang tải lên...";
+            submitBtnLoader.style.display = 'block';
+
+            let imageUrl = '';
+            try {
+                // Upload image to Firebase Storage
+                const imageRef = ref(storage, `${FIREBASE_APP_ID}/menu_images/${imageFile.name}_${new Date().getTime()}`);
+                const snapshot = await uploadBytes(imageRef, imageFile);
+                imageUrl = await getDownloadURL(snapshot.ref);
+
+                // Add item data to Firestore
+                const newItem = {
+                    name,
+                    group,
+                    desc,
+                    img: imageUrl,
+                    options: [{ size, price }]
+                };
+                await addDoc(collection(db, PUBLIC_MENU_PATH), newItem);
+
+                showToast("Thêm món thành công!", "success");
+                hideModal();
+            } catch (error) {
+                console.error("Lỗi khi thêm món:", error);
+                showToast("Có lỗi xảy ra khi thêm món. Vui lòng thử lại.", "error");
+            } finally {
+                submitBtnText.textContent = "Thêm món";
+                submitBtnLoader.style.display = 'none';
+            }
+        });
+    }
+
+    // --- Initialization ---
+    function init() {
+      // Falling elements
+      const fallingContainer = document.getElementById("falling-container");
+      const symbols = ['🌸', '🌼', '🌺', '✨', '🌷', '🌻', '🍀', '🌹', '🍂', '🍃', '❄️', '💮'];
+      function createFallingElement() {
+        const element = document.createElement('div');
+        element.className = 'falling-element';
+        element.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        element.style.left = `${Math.random() * 100}vw`;
+        element.style.animationDuration = `${Math.random() * 5 + 5}s`;
+        element.style.animationDelay = `-${Math.random() * 5}s`;
+        fallingContainer.appendChild(element);
+        setTimeout(() => element.remove(), 10000);
+      }
+      for (let i = 0; i < 30; i++) createFallingElement();
+      setInterval(createFallingElement, 1000);
+
+      // Modal Events
+      closeModalBtn.addEventListener('click', hideModal);
+      showLogBtn.addEventListener('click', renderOrdersLog);
+      addItemBtn.addEventListener('click', renderAddItemModal);
+    }
+
+    // --- Auth State Listener & Data Fetching ---
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        userId = user.uid;
+        // The admin email can be changed here
+        if (user.email === 'admin@my.app') {
+          userRole = 'admin';
+        } else {
+          userRole = 'user';
+        }
+        renderUserUI(user);
+      } else {
+        userId = crypto.randomUUID();
+        userRole = 'guest';
+        renderAuthUI();
+        showLogBtn.classList.add('hidden');
+        addItemBtn.classList.add('hidden');
+      }
+
+      // Listen for real-time changes to the menu data
+      onSnapshot(collection(db, PUBLIC_MENU_PATH), (querySnapshot) => {
+        menuData = [];
+        querySnapshot.forEach((doc) => {
+          menuData.push(doc.data());
+        });
+
+        // Re-render group buttons
+        groupList.innerHTML = '';
+        const groups = [...new Set(menuData.map(item => item.group))];
+        groups.forEach(group => {
+          const btn = document.createElement("button");
+          btn.textContent = group;
+          btn.className = "w-full py-2 px-4 bg-pink-200 text-rose-600 font-bold rounded-lg shadow hover:bg-rose-500 hover:text-white transition-colors";
+          btn.onclick = () => renderMenu(group);
+          groupList.appendChild(btn);
+        });
+
+        // Render the menu for the first group by default
+        const currentGroup = groups[0] || 'Tất cả';
+        renderMenu(currentGroup);
+      });
+    });
+    
+    // Tự động đăng nhập ẩn danh khi trang tải
+    (async () => {
+        await signInAnonymously(auth);
+    })();
+    
+    window.onload = init;
   </script>
 </body>
 </html>
