@@ -33,48 +33,20 @@
       z-index: 100;
       animation: fall linear infinite;
     }
-    .custom-file-input::-webkit-file-upload-button {
-      visibility: hidden;
+
+    /* Modal styles */
+    .modal {
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
     }
-    .custom-file-input::before {
-      content: 'Chọn ảnh';
-      display: inline-block;
-      background: linear-gradient(top, #f9f9f9, #e3e3e3);
-      border: 1px solid #999;
-      border-radius: 3px;
-      padding: 5px 8px;
-      outline: none;
-      white-space: nowrap;
-      -webkit-user-select: none;
-      cursor: pointer;
-      text-shadow: 1px 1px #fff;
-      font-weight: 700;
-      font-size: 10pt;
+    .modal.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.95);
     }
-    .custom-file-input:hover::before {
-      border-color: black;
-    }
-    .custom-file-input:active::before {
-      background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
-    }
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 4px solid #e63946;
-      width: 24px;
-      height: 24px;
-      -webkit-animation: spin 2s linear infinite; /* Safari */
-      animation: spin 2s linear infinite;
-      display: none;
-    }
-    /* Safari */
-    @-webkit-keyframes spin {
-      0% { -webkit-transform: rotate(0deg); }
-      100% { -webkit-transform: rotate(360deg); }
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .modal.visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
     }
   </style>
 </head>
@@ -99,11 +71,7 @@
         <!-- Group buttons will be rendered here -->
       </div>
 
-      <button id="add-item-btn" class="mt-4 w-full py-2 px-4 bg-purple-500 text-white font-bold rounded-lg shadow hover:bg-purple-600 transition-colors hidden">
-        Thêm Món
-      </button>
-
-      <button id="show-log-btn" class="mt-2 w-full py-2 px-4 bg-rose-500 text-white font-bold rounded-lg shadow hover:bg-rose-600 transition-colors hidden">
+      <button id="show-log-btn" class="mt-4 w-full py-2 px-4 bg-rose-500 text-white font-bold rounded-lg shadow hover:bg-rose-600 transition-colors hidden">
         Xem Đơn Hàng
       </button>
     </div>
@@ -124,8 +92,8 @@
   </div>
 
   <!-- Modal for auth and logs -->
-  <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
-    <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-md transform transition-transform duration-300 scale-95">
+  <div id="modal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-md transform scale-95">
       <div class="flex justify-between items-center mb-4">
         <h3 id="modal-title" class="text-xl font-bold text-gray-800"></h3>
         <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
@@ -139,15 +107,15 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, addDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+    import { getFirestore, addDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- Firebase Setup ---
+    // Make sure to replace this with your actual Firebase config
     const firebaseConfig = {
-      apiKey: "AIzaSyARctBmqbmoL9KPT2snk7aKebxJ-SKoMbQ",
+      apiKey: "",
       authDomain: "trasua-4a1d9.firebaseapp.com",
       projectId: "trasua-4a1d9",
-      storageBucket: "trasua-4a1d9.firebasestorage.app",
+      storageBucket: "trasua-4a1d9.appspot.com",
       messagingSenderId: "210496424940",
       appId: "1:210496424940:web:b84d326448cc7fcb790ec9",
       measurementId: "G-9R75DB010Y"
@@ -156,14 +124,12 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    const storage = getStorage(app);
     
     // --- Global Variables ---
     let userId = null;
     let userRole = 'guest';
-    const FIREBASE_APP_ID = firebaseConfig.appId;
+    const FIREBASE_APP_ID = "trasua-4a1d9";
     const PUBLIC_ORDERS_PATH = `artifacts/${FIREBASE_APP_ID}/public/data/orders`;
-    const PUBLIC_MENU_PATH = `artifacts/${FIREBASE_APP_ID}/public/data/menu`;
 
     // --- DOM Elements ---
     const grid = document.getElementById("menu");
@@ -171,12 +137,72 @@
     const authStatusDiv = document.getElementById("auth-status");
     const authUIDiv = document.getElementById("auth-ui");
     const showLogBtn = document.getElementById("show-log-btn");
-    const addItemBtn = document.getElementById("add-item-btn");
     const modal = document.getElementById("modal");
     const modalTitle = document.getElementById("modal-title");
     const modalContent = document.getElementById("modal-content");
     const closeModalBtn = document.getElementById("close-modal-btn");
 
+    // --- Menu Data (Cần phải lưu trong code) ---
+    const MENU = [
+      {
+        img: "Trà sữa 1.png",
+        name: "Trà Sữa Dâu",
+        group: "Trà Sữa",
+        options: [
+          { size: "M", price: 10000 },
+          { size: "L", price: 12000 },
+          { size: "XL", price: 15000 },
+        ],
+        desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
+      },
+      {
+        img: "Trà sữa 2.png",
+        name: "Matcha latte",
+        group: "Trà Sữa",
+        options: [
+          { size: "M", price: 29000 },
+          { size: "L", price: 30000 },
+          { size: "XL", price: 32000 },
+        ],
+        desc: "Matcha Nhật Bản thanh mát.Kết hợp sữa tươi béo nhẹ, thơm dịu."
+      },
+      {
+        img: "Topping 1.png",
+        name: "Topping Dừa",
+        group: "Topping",
+        options: [{ size: "", price: 7000 }],
+        desc: "Ngon giòn béo nhẹ."
+      },
+      {
+        img: "Topping 2.png",
+        name: "Topping Nha Đam",
+        group: "Topping",
+        options: [{ size: "", price: 5000 }],
+        desc: "Mát lạnh, giòn sần sật."
+      },
+      {
+        img: "Trà sữa 3.png",
+        name: "Sô-cô-la sữa",
+        group: "Trà Sữa",
+        options: [
+          { size: "M", price: 25000 },
+          { size: "L", price: 27000 },
+          { size: "XL", price: 30000 },
+        ],
+        desc: "Sô-cô-la ngọt ngào, hòa quyện cùng sữa tươi."
+      },
+      {
+        img: "Topping 3.png",
+        name: "Topping A",
+        group: "Topping",
+        options: [{ size: "", price: 7000 }],
+        desc: "Mô tả cái gì đó ...về topping A.."
+      }
+      // Bạn có thể thêm món mới ở đây
+    ];
+
+    const IMAGE_BASE = "./";
+    
     // --- Helper Functions ---
     function getRandomPastelColor() {
       const hue = Math.floor(Math.random() * 360);
@@ -209,13 +235,13 @@
     function showModal(title, content) {
       modalTitle.textContent = title;
       modalContent.innerHTML = content;
-      modal.classList.remove('opacity-0', 'pointer-events-none');
-      modal.querySelector('.bg-white').classList.remove('scale-95');
+      modal.classList.remove('hidden');
+      modal.classList.add('visible');
     }
 
     function hideModal() {
-      modal.classList.add('opacity-0', 'pointer-events-none');
-      modal.querySelector('.bg-white').classList.add('scale-95');
+      modal.classList.remove('visible');
+      modal.classList.add('hidden');
     }
     
     // --- Auth UI ---
@@ -273,38 +299,33 @@
             showToast("Đã đăng xuất.", "success");
         });
         showLogBtn.classList.remove('hidden');
-        addItemBtn.classList.remove('hidden');
     }
 
     // --- Render Menu & Handle Order ---
-    let menuData = [];
     function renderMenu(group) {
       grid.innerHTML = "";
-      const filteredItems = menuData.filter(item => item.group === group);
+      const filteredItems = MENU.filter(item => item.group === group);
       if (filteredItems.length === 0) {
         grid.innerHTML = `<p class="text-center text-gray-500 w-full col-span-full">Chưa có món nào trong nhóm này.</p>`;
       } else {
-        filteredItems.forEach(item => {
+        filteredItems.forEach((item, index) => {
           const card = document.createElement("div");
           card.className = "card bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-xl transition-shadow";
           card.style.backgroundColor = getRandomPastelColor();
 
           let optionsHTML = "";
-          item.options.forEach((opt, index) => {
+          item.options.forEach((opt, optIndex) => {
             optionsHTML += `
-              <div class="meta text-sm text-gray-600">
-                ${opt.size ? `Size ${opt.size} - ` : ""}
-                <span class="price font-bold text-rose-600">${opt.price.toLocaleString('vi-VN')}₫</span>
-                <button class="add-to-cart-btn ml-2 p-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600 transition-colors" data-item-name="${item.name}" data-option-index="${index}">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
+              <div class="meta text-sm text-gray-600 flex justify-between items-center">
+                <span>${opt.size ? `Size ${opt.size}` : ""} - <span class="price font-bold text-rose-600">${opt.price.toLocaleString('vi-VN')}₫</span></span>
+                <button class="add-to-cart-btn p-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600 transition-colors" data-item-name="${item.name}" data-option-index="${optIndex}">
+                  Đặt Hàng
                 </button>
               </div>`;
           });
 
           card.innerHTML = `
-            <img src="${item.img}" alt="${item.name}" class="w-full h-40 object-cover">
+            <img src="${IMAGE_BASE + item.img}" alt="${item.name}" class="w-full h-40 object-cover">
             <div class="p-4 flex flex-col flex-grow">
               <div class="font-bold text-base text-gray-800">${item.name}</div>
               <div class="mt-2 space-y-1">
@@ -319,14 +340,14 @@
         document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
           btn.addEventListener('click', async (e) => {
             const name = e.currentTarget.dataset.itemName;
-            const optionIndex = e.currentTarget.dataset.optionIndex;
-            const item = menuData.find(m => m.name === name);
+            const optionIndex = parseInt(e.currentTarget.dataset.optionIndex);
+            const item = MENU.find(m => m.name === name);
             const option = item.options[optionIndex];
 
             const order = {
               userId: userId,
               itemName: name,
-              size: option.size,
+              size: option.size || null,
               price: option.price,
               timestamp: new Date(),
             };
@@ -335,10 +356,10 @@
               try {
                 const ordersCollection = collection(db, PUBLIC_ORDERS_PATH);
                 await addDoc(ordersCollection, order);
-                showToast("Đã thêm món vào đơn hàng và lưu thành công!");
+                showToast("Đặt món thành công!", "success");
               } catch (error) {
                 console.error("Lỗi khi lưu đơn hàng:", error);
-                showToast("Có lỗi xảy ra khi lưu đơn hàng.", "error");
+                showToast("Có lỗi xảy ra khi lưu đơn hàng. Vui lòng thử lại.", "error");
               }
             } else {
               showToast("Vui lòng đăng nhập để đặt món.", "error");
@@ -350,156 +371,56 @@
 
     // --- Render Logs ---
     async function renderOrdersLog() {
-      if (userRole === 'guest') return;
-
-      let orders = [];
-      try {
-        if (userRole === 'admin') {
-          const q = query(collection(db, PUBLIC_ORDERS_PATH));
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach(doc => {
-            orders.push({ id: doc.id, ...doc.data() });
-          });
-        } else {
-          const q = query(collection(db, PUBLIC_ORDERS_PATH), where("userId", "==", userId));
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach(doc => {
-            orders.push({ id: doc.id, ...doc.data() });
-          });
-        }
-      } catch (error) {
-        console.error("Lỗi khi lấy đơn hàng:", error);
-        showModal("Lỗi", `<p class="text-red-500">Không thể lấy dữ liệu đơn hàng. Vui lòng kiểm tra kết nối.</p>`);
+      if (userRole === 'guest') {
+        showModal("Lỗi", `<p class="text-red-500">Bạn cần đăng nhập để xem lịch sử đơn hàng.</p>`);
         return;
       }
 
-      let logHTML = `
-        <div class="space-y-4">
-          ${orders.length === 0 ? '<p class="text-center text-gray-500">Chưa có đơn hàng nào.</p>' : ''}
-          ${orders.map(order => `
+      let logHTML = '<div class="space-y-4">';
+      let q = null;
+      if (userRole === 'admin') {
+        // Admin sees all orders
+        q = query(collection(db, PUBLIC_ORDERS_PATH));
+        modalTitle.textContent = "Tất cả Đơn Hàng";
+      } else {
+        // User sees only their own orders
+        q = query(collection(db, PUBLIC_ORDERS_PATH), where("userId", "==", userId));
+        modalTitle.textContent = "Lịch Sử Đơn Hàng Của Tôi";
+      }
+
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const orders = [];
+        querySnapshot.forEach(doc => {
+          orders.push({ id: doc.id, ...doc.data() });
+        });
+
+        if (orders.length === 0) {
+          logHTML = '<p class="text-center text-gray-500">Chưa có đơn hàng nào.</p>';
+        } else {
+          logHTML = orders.map(order => `
             <div class="p-4 bg-pink-100 rounded-lg shadow">
               <p class="font-bold text-rose-600">${order.itemName} ${order.size ? `(Size: ${order.size})` : ''}</p>
               <p class="text-sm text-gray-700">Giá: ${order.price.toLocaleString('vi-VN')}₫</p>
               <p class="text-xs text-gray-500">Thời gian: ${order.timestamp.toDate().toLocaleString('vi-VN')}</p>
-              ${userRole === 'admin' ? `<p class="text-xs text-gray-500">Khách hàng: ${order.userId}</p>` : ''}
+              ${userRole === 'admin' ? `<p class="text-xs text-gray-500 mt-1">Khách hàng UID: ${order.userId}</p>` : ''}
             </div>
-          `).join('')}
-        </div>
-      `;
-      showModal("Lịch Sử Đơn Hàng", logHTML);
+          `).join('');
+        }
+        modalContent.innerHTML = logHTML;
+      }, (error) => {
+        console.error("Lỗi khi lấy đơn hàng:", error);
+        showModal("Lỗi", `<p class="text-red-500">Không thể lấy dữ liệu đơn hàng. Vui lòng kiểm tra kết nối.</p>`);
+      });
+
+      // Show modal immediately
+      showModal("Loading...", '<div class="text-center">Đang tải đơn hàng...</div>');
     }
     
-    // --- Add Item Modal ---
-    function renderAddItemModal() {
-        const modalContentHTML = `
-            <form id="add-item-form" class="space-y-4">
-                <div>
-                    <label for="item-name" class="block text-sm font-medium text-gray-700">Tên món</label>
-                    <input type="text" id="item-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                </div>
-                <div>
-                    <label for="item-desc" class="block text-sm font-medium text-gray-700">Mô tả</label>
-                    <textarea id="item-desc" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
-                </div>
-                <div>
-                    <label for="item-group" class="block text-sm font-medium text-gray-700">Nhóm</label>
-                    <input type="text" id="item-group" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                </div>
-                <div>
-                    <label for="item-price" class="block text-sm font-medium text-gray-700">Giá</label>
-                    <input type="number" id="item-price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                </div>
-                <div>
-                    <label for="item-size" class="block text-sm font-medium text-gray-700">Size (tùy chọn)</label>
-                    <input type="text" id="item-size" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                </div>
-                <div>
-                    <label for="item-image" class="block text-sm font-medium text-gray-700">Ảnh món ăn</label>
-                    <input type="file" id="item-image" accept="image/*" class="mt-1 block w-full custom-file-input">
-                    <img id="image-preview" src="#" alt="Image Preview" class="mt-2 w-32 h-32 object-cover rounded-md hidden">
-                </div>
-                <button type="submit" class="w-full py-2 px-4 bg-green-500 text-white font-bold rounded-lg shadow hover:bg-green-600 transition-colors flex items-center justify-center">
-                    <span id="submit-text">Thêm món</span>
-                    <div id="submit-loader" class="loader ml-2"></div>
-                </button>
-            </form>
-        `;
-        showModal("Thêm Món Mới", modalContentHTML);
-
-        const form = document.getElementById('add-item-form');
-        const imageInput = document.getElementById('item-image');
-        const imagePreview = document.getElementById('image-preview');
-        const submitBtnText = document.getElementById('submit-text');
-        const submitBtnLoader = document.getElementById('submit-loader');
-
-        imageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    imagePreview.src = e.target.result;
-                    imagePreview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                imagePreview.classList.add('hidden');
-            }
-        });
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('item-name').value;
-            const desc = document.getElementById('item-desc').value;
-            const group = document.getElementById('item-group').value;
-            const price = parseFloat(document.getElementById('item-price').value);
-            const size = document.getElementById('item-size').value;
-            const imageFile = imageInput.files[0];
-
-            if (!name || !group || isNaN(price) || !imageFile) {
-                showToast("Vui lòng nhập đầy đủ thông tin và chọn ảnh.", "error");
-                // Restore button state
-                submitBtnText.textContent = "Thêm món";
-                submitBtnLoader.style.display = 'none';
-                return;
-            }
-
-            // Show loading state
-            submitBtnText.textContent = "Đang tải lên...";
-            submitBtnLoader.style.display = 'block';
-
-            try {
-                // Upload image to Firebase Storage
-                const imageRef = ref(storage, `${FIREBASE_APP_ID}/menu_images/${imageFile.name}_${new Date().getTime()}`);
-                const snapshot = await uploadBytes(imageRef, imageFile);
-                const imageUrl = await getDownloadURL(snapshot.ref);
-
-                // Add item data to Firestore
-                const newItem = {
-                    name,
-                    group,
-                    desc,
-                    img: imageUrl,
-                    options: [{ size, price }]
-                };
-                await addDoc(collection(db, PUBLIC_MENU_PATH), newItem);
-
-                showToast("Thêm món thành công!", "success");
-                hideModal();
-            } catch (error) {
-                console.error("Lỗi khi thêm món:", error);
-                showToast("Có lỗi xảy ra khi thêm món. Vui lòng thử lại. Lỗi: " + error.message, "error");
-            } finally {
-                submitBtnText.textContent = "Thêm món";
-                submitBtnLoader.style.display = 'none';
-            }
-        });
-    }
-
     // --- Initialization ---
     function init() {
       // Falling elements
       const fallingContainer = document.getElementById("falling-container");
-      const symbols = ['🌸', '🌼', '🌺', '✨', '🌷', '🌻', '🍀', '🌹', '🍂', '🍃', '❄️', '💮'];
+      const symbols = ['🌸', '🌼', '🌺', '✨', '🌷', '🌻', '🍀', '🌹', '�', '🍃', '❄️', '💮'];
       function createFallingElement() {
         const element = document.createElement('div');
         element.className = 'falling-element';
@@ -516,58 +437,52 @@
       // Modal Events
       closeModalBtn.addEventListener('click', hideModal);
       showLogBtn.addEventListener('click', renderOrdersLog);
-      addItemBtn.addEventListener('click', renderAddItemModal);
+      
+      // Render initial menu
+      const groups = [...new Set(MENU.map(item => item.group))];
+      groups.forEach(group => {
+        const btn = document.createElement("button");
+        btn.textContent = group;
+        btn.className = "w-full py-2 px-4 bg-pink-200 text-rose-600 font-bold rounded-lg shadow hover:bg-rose-500 hover:text-white transition-colors";
+        btn.onclick = () => renderMenu(group);
+        groupList.appendChild(btn);
+      });
+      if (groups.length > 0) {
+        renderMenu(groups[0]);
+      }
     }
-
-    // --- Auth State Listener & Data Fetching ---
+    
+    // --- Auth State Listener ---
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         userId = user.uid;
-        // The admin email can be changed here
-        if (user.email === 'admin@my.app') {
+        // Set the admin email here. Change it if you want.
+        const ADMIN_EMAIL = 'admin@my.app';
+        if (user.email === ADMIN_EMAIL) {
           userRole = 'admin';
         } else {
           userRole = 'user';
         }
         renderUserUI(user);
       } else {
-        userId = crypto.randomUUID();
+        userId = null;
         userRole = 'guest';
         renderAuthUI();
         showLogBtn.classList.add('hidden');
-        addItemBtn.classList.add('hidden');
       }
-
-      // Listen for real-time changes to the menu data
-      onSnapshot(collection(db, PUBLIC_MENU_PATH), (querySnapshot) => {
-        menuData = [];
-        querySnapshot.forEach((doc) => {
-          menuData.push(doc.data());
-        });
-
-        // Re-render group buttons
-        groupList.innerHTML = '';
-        const groups = [...new Set(menuData.map(item => item.group))];
-        groups.forEach(group => {
-          const btn = document.createElement("button");
-          btn.textContent = group;
-          btn.className = "w-full py-2 px-4 bg-pink-200 text-rose-600 font-bold rounded-lg shadow hover:bg-rose-500 hover:text-white transition-colors";
-          btn.onclick = () => renderMenu(group);
-          groupList.appendChild(btn);
-        });
-
-        // Render the menu for the first group by default
-        const currentGroup = groups[0] || 'Tất cả';
-        renderMenu(currentGroup);
-      });
     });
-    
-    // Tự động đăng nhập ẩn danh khi trang tải
+
+    // Auto sign in anonymously on first load
     (async () => {
+      try {
         await signInAnonymously(auth);
+      } catch (error) {
+        console.error("Anonymous sign-in failed:", error);
+      }
     })();
     
     window.onload = init;
   </script>
 </body>
 </html>
+�
