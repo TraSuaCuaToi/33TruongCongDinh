@@ -4,17 +4,19 @@
   <meta charset="utf-8">
   <title>Menu Trà Sữa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <style>
-    /* Reset CSS cơ bản và font */
+    /* Basic CSS Reset and Font */
     body {
       font-family: Arial, sans-serif;
       background-color: white;
       padding: 0;
       margin: 0;
-      overflow-x: hidden; /* NGĂN CHẶN THANH CUỘN NGANG */
+      overflow-x: hidden; /* Prevents horizontal scrolling */
     }
 
-    /* Bố cục chính của ứng dụng - sử dụng flexbox linh hoạt */
+    /* Main App Container */
     .app-container {
       width: 100%;
       min-height: 100vh;
@@ -22,16 +24,19 @@
       flex-direction: column;
     }
 
-    /* Header cố định trên cùng */
+    /* Fixed Header at the top */
     .header {
       width: 100%;
       background-color: #f8f8f8;
       padding: 10px 20px;
       display: flex;
-      justify-content: space-between; /* Đẩy hai button về hai phía */
+      justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      flex-shrink: 0;
+      position: fixed; /* Fixed position */
+      top: 0;
+      left: 0;
+      z-index: 1000;
     }
     .header button {
       padding: 10px 15px;
@@ -46,10 +51,10 @@
       color: white;
     }
     
-    /* Vùng thông tin quán cố định */
+    /* Store Info Section */
     .store-info-section {
       text-align: center;
-      padding: 20px;
+      padding: 60px 20px 20px; /* Added padding to clear the fixed header */
       background-color: #ffe4e9;
       flex-shrink: 0;
     }
@@ -66,28 +71,28 @@
       color: #555;
     }
 
-    /* Vùng chứa nội dung chính - luôn chiếm không gian còn lại */
+    /* Main Content Area */
     .content-container {
       display: flex;
       flex-grow: 1;
     }
 
-    /* Sidebar di động, mặc định ẩn */
+    /* Sidebar - Initially hidden */
     .sidebar {
       position: fixed;
-      left: -250px; /* Ẩn sidebar bằng cách đẩy ra ngoài màn hình */
+      left: -250px; /* Initially hidden off-screen */
       top: 0;
       bottom: 0;
       width: 250px;
       background: #f8f8f8;
       padding: 20px;
       box-shadow: 2px 0 6px rgba(0,0,0,0.2);
-      transition: left 0.3s ease-in-out; /* Tạo hiệu ứng trượt */
-      z-index: 1000;
+      transition: left 0.3s ease-in-out; /* Smooth slide effect */
+      z-index: 2000; /* Higher z-index to be on top of everything */
       overflow-y: auto;
     }
     .sidebar.open {
-      left: 0; /* Hiện sidebar khi có class 'open' */
+      left: 0; /* Shows sidebar when 'open' class is added */
     }
     .sidebar h3 {
       margin-top: 0;
@@ -120,7 +125,7 @@
       cursor: pointer;
     }
 
-    /* Overlay khi sidebar mở */
+    /* Overlay when sidebar is open */
     .overlay {
       display: none;
       position: fixed;
@@ -129,13 +134,13 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
-      z-index: 999;
+      z-index: 1999;
     }
     .overlay.show {
       display: block;
     }
 
-    /* Nội dung chính ở giữa, có thể cuộn */
+    /* Main content area */
     .main {
       padding: 20px;
       flex-grow: 1;
@@ -174,6 +179,7 @@
       padding: 12px;
       display: flex;
       flex-direction: column;
+      flex-grow: 1; /* Pushes the button to the bottom */
       gap: 6px;
     }
     .name {
@@ -207,6 +213,7 @@
       cursor: pointer;
       border-radius: 0 0 8px 8px;
       width: 100%;
+      margin-top: auto; /* Aligns button to the bottom */
     }
     .add-to-cart-button:hover {
       background-color: #d42c38;
@@ -223,7 +230,7 @@
       text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
     
-    /* Các hiệu ứng và modals giữ nguyên từ phiên bản trước */
+    /* Falling flowers effect and modals remain the same */
     @keyframes fall {
       0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
       10% { opacity: 1; }
@@ -340,7 +347,7 @@
       cursor: pointer;
     }
 
-    /* CSS cho danh sách đơn hàng */
+    /* CSS for order list */
     #order-list-container {
       display: none;
       margin-top: 40px;
@@ -456,9 +463,6 @@
         margin-bottom: 10px;
     }
   </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="app-container">
@@ -477,14 +481,14 @@
     </div>
     
     <div class="content-container">
-        <!-- Sidebar di động, mặc định ẩn -->
+        <!-- Sidebar initially hidden -->
         <div class="sidebar" id="group-sidebar">
             <button class="sidebar-close-btn">&times;</button>
             <h3>Nhóm món</h3>
             <div id="group-list"></div>
         </div>
         
-        <!-- Lớp phủ khi menu mở -->
+        <!-- Overlay for sidebar -->
         <div id="overlay" class="overlay"></div>
 
         <div class="main">
@@ -596,7 +600,7 @@
     const MENU = [
       // Món 1: Trà sữa
       {
-        img: "Trà sữa 1.png",
+        img: "https://placehold.co/400x300/F4D7C8/4F2C2C?text=Trà+sữa+Dâu",
         name: "Trà Sữa Dâu",
         group: "Trà Sữa",
         options: [
@@ -608,7 +612,7 @@
       },
       // Món 2: Matcha
       {
-        img: "Trà sữa 2.png",
+        img: "https://placehold.co/400x300/C8F4D7/2C4F2C?text=Matcha+latte",
         name: "Matcha latte",
         group: "Trà Sữa",
         options: [
@@ -620,7 +624,7 @@
       },
       // Món 3: Topping
       {
-        img: "Topping 1.png",
+        img: "https://placehold.co/400x300/F4EAC8/4F442C?text=Topping+Dừa",
         name: "Topping Dừa",
         group: "Topping",
         options: [ { size: "", price: 7000 } ],
@@ -628,7 +632,7 @@
       },
       // Món 4: Topping
       {
-        img: "Topping 2.png",
+        img: "https://placehold.co/400x300/C8D7F4/2C444F?text=Topping+Nha+Đam",
         name: "Topping Nha Đam",
         group: "Topping",
         options: [ { size: "", price: 5000 } ],
@@ -636,7 +640,7 @@
       },
       // Món 5: Trà sữa
       {
-        img: "Trà sữa 3.png",
+        img: "https://placehold.co/400x300/D7C8F4/442C4F?text=Sô-cô-la+sữa",
         name: "Sô-cô-la sữa",
         group: "Trà Sữa",
         options: [
@@ -648,7 +652,7 @@
       },
       // Món 6: Topping
       {
-        img: "Topping 3.png",
+        img: "https://placehold.co/400x300/F4C8D7/4F2C44?text=Topping+A",
         name: "Topping A",
         group: "Topping",
         options: [ { size: "", price: 7000 } ],
@@ -681,20 +685,20 @@
 
     const groups = [...new Set(MENU.map(item => item.group))];
     
-    // Render groups cho sidebar
+    // Render groups for sidebar
     groups.forEach(group => {
       const btn = document.createElement("button");
       btn.textContent = group;
       btn.onclick = () => {
           renderMenu(group);
-          // Ẩn sidebar sau khi chọn
+          // Hide sidebar after selection
           sidebar.classList.remove('open');
           overlay.classList.remove('show');
       };
       groupList.appendChild(btn);
     });
 
-    // Tạo danh sách topping có thể chọn
+    // Create a list of toppings that can be selected
     const toppingItems = MENU.filter(item => item.group === "Topping");
     const toppingCheckboxes = document.getElementById('topping-checkboxes');
     toppingItems.forEach((topping, index) => {
@@ -720,16 +724,14 @@
           optionsHTML += `<div class="meta">${opt.size ? `Size ${opt.size}` : ""} - <span class="price">${opt.price.toLocaleString('vi-VN')}₫</span></div>`;
         });
 
-        const buttonText = item.group === "Topping" ? "Thêm vào giỏ" : "Thêm vào giỏ";
-
         card.innerHTML = `
-          <img src="${IMAGE_BASE + item.img}" alt="${item.name}">
+          <img src="${item.img}" alt="${item.name}">
           <div class="info">
             <div class="name">${item.name}</div>
             ${optionsHTML}
             <div class="desc">${item.desc || ""}</div>
+            <button class="add-to-cart-button" data-name="${item.name}" data-group="${item.group}">Thêm vào giỏ</button>
           </div>
-          <button class="add-to-cart-button" data-name="${item.name}" data-group="${item.group}">${buttonText}</button>
         `;
         grid.appendChild(card);
       });
@@ -740,7 +742,7 @@
 
     renderMenu(groups[0]);
 
-    // hiệu ứng hoa rơi
+    // Falling flower effect
     const fallingContainer = document.getElementById("falling-container");
     const symbols = ['🌸','🌼','🌺','✨','🌷','🌻','🍀','🌹','🍂','🍃','❄️','💮'];
     function createFallingElement() {
@@ -762,7 +764,7 @@
       document.getElementById('customAlertModal').style.display = 'block';
     }
 
-    // Bắt đầu phần code Firebase
+    // Firebase Setup
     const firebaseConfig = {
       apiKey: "AIzaSyARctBmqbmoL9KPT2snk7aKebxJ-SKoMbQ",
       authDomain: "trasua-4a1d9.firebaseapp.com",
@@ -809,34 +811,34 @@
     const submitOrderCartBtn = document.getElementById('submit-order-cart');
     const closeButtons = document.querySelectorAll('.modal .close');
 
-    // Mở modal đăng nhập
+    // Open login modal
     authButton.addEventListener('click', () => authModal.style.display = 'block');
     
-    // Mở modal đổi mật khẩu từ modal chính
+    // Open password change modal
     changePasswordBtnModal.addEventListener('click', () => {
         authModal.style.display = 'none';
         changePasswordModal.style.display = 'block';
     });
     
-    // Mở modal tạo tài khoản từ modal chính
+    // Open create user modal
     createUserBtnModal.addEventListener('click', () => {
         authModal.style.display = 'none';
         createUserModal.style.display = 'block';
     });
     
-    // Mở modal giỏ hàng
+    // Open cart modal
     cartButton.addEventListener('click', () => {
       renderCart();
       cartModal.style.display = 'block';
     });
 
-    // Mở/đóng sidebar
+    // Toggle sidebar
     menuToggleBtn.addEventListener('click', () => {
       sidebar.classList.toggle('open');
       overlay.classList.toggle('show');
     });
 
-    // Đóng sidebar khi click vào nút close hoặc lớp phủ
+    // Close sidebar
     sidebarCloseBtn.addEventListener('click', () => {
       sidebar.classList.remove('open');
       overlay.classList.remove('show');
@@ -847,7 +849,7 @@
       overlay.classList.remove('show');
     });
     
-    // Xử lý khi click vào nút "Thêm vào giỏ" trên trang chính
+    // Handle "Add to Cart" button on main page
     function handleAddToCart(e) {
       const itemName = e.target.getAttribute('data-name');
       const itemGroup = e.target.getAttribute('data-group');
@@ -856,7 +858,7 @@
       if (!currentConfigItem) return;
       
       configItemName.textContent = currentConfigItem.name;
-      configNotes.value = ''; // Reset ghi chú
+      configNotes.value = ''; // Reset notes
 
       // Render size options
       sizeRadioButtons.innerHTML = '';
@@ -882,7 +884,7 @@
       configModal.style.display = 'block';
     }
 
-    // Xử lý khi click nút "Thêm vào giỏ" trong pop-up
+    // Handle "Add to Cart" button in popup
     addToCartFinalButton.addEventListener('click', () => {
         if (!currentConfigItem) return;
 
@@ -916,12 +918,12 @@
         configModal.style.display = 'none';
     });
 
-    // Cập nhật số lượng món trong giỏ hàng
+    // Update cart count
     function updateCartCount() {
       cartCount.textContent = cart.length;
     }
     
-    // Render lại giỏ hàng trong modal
+    // Render cart items in modal
     function renderCart() {
       cartItemsDiv.innerHTML = '';
       let total = 0;
@@ -974,7 +976,7 @@
       });
     }
 
-    // Cập nhật món trong giỏ hàng khi thay đổi số lượng
+    // Update cart item quantity
     function updateCartItem(e) {
       const index = e.target.getAttribute('data-index');
       const item = cart[index];
@@ -983,7 +985,7 @@
       renderCart();
     }
     
-    // Xóa món khỏi giỏ hàng
+    // Remove item from cart
     function removeCartItem(e) {
       const index = e.target.getAttribute('data-index');
       cart.splice(index, 1);
@@ -991,12 +993,11 @@
       renderCart();
     }
     
-    // Xử lý submit đơn hàng từ giỏ
+    // Handle order submission
     submitOrderCartBtn.addEventListener('click', async () => {
       const phoneNumber = phoneNumberInput.value.trim();
       const notes = notesInput.value.trim();
 
-      // Kiểm tra người dùng đã đăng nhập chưa
       const user = auth.currentUser;
       if (!user) {
         showCustomAlert('Vui lòng đăng nhập để đặt hàng.');
@@ -1036,7 +1037,7 @@
       }
     });
 
-    // Đóng các modal khi click nút 'x' hoặc click ra ngoài
+    // Close modals
     closeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const modalId = btn.getAttribute('data-modal');
@@ -1072,7 +1073,7 @@
       }
     });
 
-    // Xử lý đổi mật khẩu
+    // Handle password change
     submitChangePasswordBtn.addEventListener('click', () => {
       const oldPassword = oldPasswordInput.value;
       const newPassword = newPasswordInput.value;
@@ -1116,7 +1117,7 @@
       }
     });
 
-    // Xử lý tạo tài khoản mới
+    // Handle new user creation
     submitCreateUserBtn.addEventListener('click', () => {
       const newUserEmail = newUserEmailInput.value;
       const newUserPassword = newUserPasswordInput.value;
@@ -1138,7 +1139,7 @@
       }
     });
 
-    // Xử lý đăng nhập
+    // Handle login
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const email = loginForm['login-email'].value;
@@ -1155,7 +1156,7 @@
         });
     });
 
-    // Xử lý đăng xuất
+    // Handle logout
     logoutBtnModal.addEventListener('click', () => {
       auth.signOut().then(() => {
         console.log('Người dùng đã đăng xuất.');
@@ -1165,7 +1166,7 @@
       });
     });
 
-    // Lắng nghe trạng thái đăng nhập
+    // Listen for auth state changes
     auth.onAuthStateChanged(user => {
       if (user) {
         authStatus.textContent = `Chào mừng, ${user.email}!`;
