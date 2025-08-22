@@ -10,16 +10,15 @@
       background-color: white;
       padding: 0;
       margin: 0;
-      position: relative;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* Header */
+    /* Header cố định trên cùng */
     .header {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       padding: 10px 20px;
       background-color: #f8f8f8;
@@ -27,17 +26,6 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-    }
-
-    .header .store-name {
-      font-family: 'Dancing Script', cursive;
-      font-size: 2rem;
-      color: #8e44ad;
-      margin: 0;
-    }
-    .header .store-name a {
-      text-decoration: none;
-      color: inherit;
     }
     
     .top-right-controls {
@@ -82,13 +70,53 @@
         background-color: #d42c38;
     }
 
-    /* Main Content */
+    /* Vùng chứa chính */
+    .container {
+      display: flex;
+      flex-grow: 1;
+      width: 100%;
+      overflow-x: hidden; /* Ngăn chặn cuộn ngang */
+    }
+
+    /* Sidebar cố định trên desktop */
+    .sidebar {
+      width: 200px;
+      background: #f8f8f8;
+      padding: 20px;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .sidebar h3 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: #e63946;
+    }
+    .sidebar button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: none;
+      background: #ffe4e9;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .sidebar button:hover {
+      background: #e63946;
+      color: white;
+    }
+
+    /* Nội dung chính */
     .main {
       padding: 20px;
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow-x: hidden; /* Ngăn chặn cuộn ngang */
+      position: relative;
     }
     .grid {
       display:grid;
@@ -204,15 +232,15 @@
       animation: fall linear infinite;
     }
 
-    /* Collapsible Sidebar */
+    /* Sidebar trên mobile */
     .collapsible-sidebar {
         position: fixed;
         left: 0;
         top: 0;
         bottom: 0;
-        width: 0; /* Default hidden */
+        width: 0;
         background: #f8f8f8;
-        padding: 20px 0; /* No padding when closed */
+        padding: 20px 0;
         box-shadow: 2px 0 6px rgba(0,0,0,0.1);
         overflow-y: auto;
         overflow-x: hidden;
@@ -220,11 +248,11 @@
         z-index: 1001;
     }
     .collapsible-sidebar.open {
-        width: 200px;
+        width: 80%;
         padding: 20px;
     }
     .menu-toggle {
-        display: none; /* Hidden on large screen */
+        display: none;
         position: fixed;
         left: 10px;
         top: 10px;
@@ -236,32 +264,12 @@
         padding: 8px 12px;
         cursor: pointer;
     }
-    .collapsible-sidebar h3 {
-      margin-top: 0;
-      font-size: 1.2rem;
-      color: #e63946;
-    }
-    .collapsible-sidebar button {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border: none;
-      background: #ffe4e9;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-    .collapsible-sidebar button:hover {
-      background: #e63946;
-      color: white;
-    }
 
     /* Modals */
     .modal {
       display: none;
       position: fixed;
-      z-index: 2000; /* Higher z-index for modals */
+      z-index: 2000;
       left: 0;
       top: 0;
       width: 100%;
@@ -478,8 +486,11 @@
 
     /* Media Queries for Mobile */
     @media (max-width: 768px) {
-        .header .store-name {
-            font-size: 1.5rem;
+        .header {
+            justify-content: space-between;
+        }
+        .sidebar {
+            display: none; /* Ẩn sidebar trên mobile */
         }
         .main {
             padding: 10px;
@@ -506,6 +517,40 @@
             gap: 10px;
         }
     }
+
+    /* Media Queries for Desktop/Tablet */
+    @media (min-width: 769px) {
+        .header {
+            display: none; /* Ẩn header trên desktop để tránh trùng lặp */
+        }
+        .menu-toggle {
+            display: none;
+        }
+        .main {
+            align-items: flex-start;
+            flex-direction: row;
+        }
+        .store-info {
+            text-align: left;
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+        .store-name-main {
+            font-size: 3rem;
+        }
+        .store-address {
+            font-size: 1rem;
+        }
+        .grid {
+            margin-top: 0;
+        }
+        .store-info-and-menu {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+        }
+    }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -513,38 +558,58 @@
 </head>
 <body>
   
-  <button class="menu-toggle">☰</button>
-  <div class="collapsible-sidebar" id="group-sidebar">
-    <h3>Nhóm món</h3>
-    <div id="group-list"></div>
-    <div id="auth-controls" style="margin-top: 20px;">
-      <button id="logout-btn" style="display: none;">Đăng xuất</button>
-      <button id="change-password-btn" style="display: none;">Đổi mật khẩu</button>
-      <button id="create-user-btn" style="display: none;">Tạo tài khoản mới</button>
-    </div>
-  </div>
+  <header class="header">
+      <button class="menu-toggle">☰</button>
+      <div class="top-right-controls">
+        <button id="auth-button-mobile" class="auth-button">Đăng nhập</button>
+        <button id="cart-button-mobile" class="cart-button">
+          Giỏ Hàng (<span id="cart-count-mobile">0</span>)
+        </button>
+      </div>
+  </header>
+  
+  <div class="container">
+      <!-- Sidebar trên desktop -->
+      <div class="sidebar" id="group-sidebar-desktop">
+          <h3>Nhóm món</h3>
+          <div id="group-list-desktop"></div>
+          <div id="auth-controls" style="margin-top: 20px;">
+              <button id="logout-btn" style="display: none;">Đăng xuất</button>
+              <button id="change-password-btn" style="display: none;">Đổi mật khẩu</button>
+              <button id="create-user-btn" style="display: none;">Tạo tài khoản mới</button>
+          </div>
+      </div>
 
-  <div class="main">
-    <div id="falling-container"></div>
-    <div class="store-info">
-      <h1 class="store-name-main">Trà Sữa Của Tôi</h1>
-      <p class="store-address">33 Tôn Đức Thắng, Đà Nẵng</p>
-    </div>
+      <!-- Sidebar trên mobile -->
+      <div class="collapsible-sidebar" id="group-sidebar-mobile">
+          <h3>Nhóm món</h3>
+          <div id="group-list-mobile"></div>
+      </div>
+      
+      <div class="main">
+          <div id="falling-container"></div>
+          <div class="store-info-and-menu">
+            <div class="store-info">
+              <h1 class="store-name-main">Trà Sữa Của Tôi</h1>
+              <p class="store-address">33 Tôn Đức Thắng, Đà Nẵng</p>
+            </div>
+            
+            <div class="top-right-controls" style="position: sticky; top: 0; z-index: 1000; background-color: #f8f8f8; width: 100%; justify-content: flex-end; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <button id="auth-button-desktop" class="auth-button">Đăng nhập</button>
+                <button id="cart-button-desktop" class="cart-button">
+                  Giỏ Hàng (<span id="cart-count-desktop">0</span>)
+                </button>
+            </div>
 
-    <div class="top-right-controls" style="position: fixed; top: 20px; right: 20px;">
-      <button id="auth-button" class="auth-button">Đăng nhập</button>
-      <button id="cart-button" class="cart-button">
-        Giỏ Hàng (<span id="cart-count">0</span>)
-      </button>
-    </div>
-
-    <h2>Menu Trà Sữa</h2>
-    <div id="menu" class="grid"></div>
-
-    <div id="order-list-container">
-      <h2>Danh Sách Đơn Hàng</h2>
-      <div id="order-list">Không có đơn hàng nào.</div>
-    </div>
+            <h2>Menu Trà Sữa</h2>
+            <div id="menu" class="grid"></div>
+          </div>
+      
+          <div id="order-list-container">
+            <h2>Danh Sách Đơn Hàng</h2>
+            <div id="order-list">Không có đơn hàng nào.</div>
+          </div>
+      </div>
   </div>
 
   <div id="authModal" class="modal">
@@ -716,26 +781,40 @@
     }
 
     const grid = document.getElementById("menu");
-    const groupSidebar = document.getElementById("group-sidebar");
+    const groupSidebarDesktop = document.getElementById("group-sidebar-desktop");
+    const groupSidebarMobile = document.getElementById("group-sidebar-mobile");
     const menuToggleBtn = document.querySelector('.menu-toggle');
-    const groupList = document.getElementById("group-list");
-    const cartButton = document.getElementById("cart-button");
-    const cartCount = document.getElementById("cart-count");
+    const groupListDesktop = document.getElementById("group-list-desktop");
+    const groupListMobile = document.getElementById("group-list-mobile");
+    const cartButtonMobile = document.getElementById("cart-button-mobile");
+    const cartCountMobile = document.getElementById("cart-count-mobile");
+    const cartButtonDesktop = document.getElementById("cart-button-desktop");
+    const cartCountDesktop = document.getElementById("cart-count-desktop");
     const orderListContainer = document.getElementById("order-list-container");
     const orderList = document.getElementById("order-list");
-    const authButton = document.getElementById('auth-button');
+    const authButtonMobile = document.getElementById('auth-button-mobile');
+    const authButtonDesktop = document.getElementById('auth-button-desktop');
+
 
     const groups = [...new Set(MENU.map(item => item.group))];
+    
+    // Render groups for desktop sidebar
+    groups.forEach(group => {
+      const btn = document.createElement("button");
+      btn.textContent = group;
+      btn.onclick = () => renderMenu(group);
+      groupListDesktop.appendChild(btn);
+    });
+
+    // Render groups for mobile sidebar
     groups.forEach(group => {
       const btn = document.createElement("button");
       btn.textContent = group;
       btn.onclick = () => {
         renderMenu(group);
-        if (window.innerWidth <= 768) {
-          groupSidebar.classList.remove('open');
-        }
+        groupSidebarMobile.classList.remove('open');
       };
-      groupList.appendChild(btn);
+      groupListMobile.appendChild(btn);
     });
     
     // Tạo danh sách topping có thể chọn
@@ -784,15 +863,15 @@
 
     renderMenu(groups[0]);
 
-    // Sidebar Toggle
+    // Sidebar Toggle for mobile
     menuToggleBtn.addEventListener('click', () => {
-        groupSidebar.classList.toggle('open');
+        groupSidebarMobile.classList.toggle('open');
     });
 
     // Close sidebar on outside click on mobile
     window.addEventListener('click', (e) => {
-      if (window.innerWidth <= 768 && groupSidebar.classList.contains('open') && !groupSidebar.contains(e.target) && e.target !== menuToggleBtn) {
-        groupSidebar.classList.remove('open');
+      if (window.innerWidth <= 768 && groupSidebarMobile.classList.contains('open') && !groupSidebarMobile.contains(e.target) && e.target !== menuToggleBtn) {
+        groupSidebarMobile.classList.remove('open');
       }
     });
 
@@ -866,21 +945,27 @@
     const closeButtons = document.querySelectorAll('.modal .close');
 
     // Mở modal đăng nhập
-    authButton.addEventListener('click', () => {
-        authModal.style.display = 'block';
-    });
+    authButtonMobile.addEventListener('click', () => authModal.style.display = 'block');
+    authButtonDesktop.addEventListener('click', () => authModal.style.display = 'block');
+    
     // Mở modal đổi mật khẩu từ modal chính
     changePasswordBtnModal.addEventListener('click', () => {
         authModal.style.display = 'none';
         changePasswordModal.style.display = 'block';
     });
+    
     // Mở modal tạo tài khoản từ modal chính
     createUserBtnModal.addEventListener('click', () => {
         authModal.style.display = 'none';
         createUserModal.style.display = 'block';
     });
+    
     // Mở modal giỏ hàng
-    cartButton.addEventListener('click', () => {
+    cartButtonMobile.addEventListener('click', () => {
+      renderCart();
+      cartModal.style.display = 'block';
+    });
+    cartButtonDesktop.addEventListener('click', () => {
       renderCart();
       cartModal.style.display = 'block';
     });
@@ -956,7 +1041,8 @@
 
     // Cập nhật số lượng món trong giỏ hàng
     function updateCartCount() {
-      cartCount.textContent = cart.length;
+      cartCountMobile.textContent = cart.length;
+      cartCountDesktop.textContent = cart.length;
     }
     
     // Render lại giỏ hàng trong modal
@@ -1033,6 +1119,13 @@
     submitOrderCartBtn.addEventListener('click', async () => {
       const phoneNumber = phoneNumberInput.value.trim();
       const notes = notesInput.value.trim();
+
+      // Kiểm tra người dùng đã đăng nhập chưa
+      const user = auth.currentUser;
+      if (!user) {
+        showCustomAlert('Vui lòng đăng nhập để đặt hàng.');
+        return;
+      }
       
       if (cart.length === 0) {
           showCustomAlert('Giỏ hàng trống, vui lòng chọn món trước khi đặt.');
@@ -1045,6 +1138,7 @@
       }
 
       const newOrder = {
+          userId: user.uid,
           phoneNumber: phoneNumber,
           items: cart,
           notes: notes,
