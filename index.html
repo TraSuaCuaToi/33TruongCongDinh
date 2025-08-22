@@ -195,27 +195,13 @@
       border-radius: 8px;
       border: 1px solid #4CAF50;
     }
-    .admin-panel input, .admin-panel button {
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    .admin-panel button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .admin-panel button:hover {
-      background: #45a049;
-    }
 
     #auth-status {
       font-size: 0.9rem;
       color: #333;
     }
     
-    /* CSS mới cho popup đổi mật khẩu */
+    /* CSS cho popup đổi mật khẩu và tạo tài khoản */
     .modal {
       display: none;
       position: fixed;
@@ -297,6 +283,7 @@
     <div id="auth-controls" style="margin-top: 20px;">
       <button id="logout-btn" style="display: none;">Đăng xuất</button>
       <button id="change-password-btn" style="display: none;">Đổi mật khẩu</button>
+      <button id="create-user-btn" style="display: none;">Tạo tài khoản mới</button>
     </div>
   </div>
 
@@ -315,29 +302,32 @@
         <input type="password" id="login-password" placeholder="Mật khẩu" required>
         <button type="submit">Đăng nhập</button>
       </form>
-      
-      <!-- Admin Panel -->
-      <div id="admin-panel" class="admin-panel">
-        <h3>Tạo tài khoản mới</h3>
-        <input type="email" id="new-user-email" placeholder="Email người dùng mới" required>
-        <input type="password" id="new-user-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" required>
-        <button id="create-user-btn">Tạo tài khoản</button>
-      </div>
     </div>
 
     <h2>Menu Trà Sữa</h2>
     <div id="menu" class="grid"></div>
   </div>
 
-  <!-- Thêm modal đổi mật khẩu -->
+  <!-- Modal đổi mật khẩu -->
   <div id="changePasswordModal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
+      <span class="close" data-modal="changePasswordModal">&times;</span>
       <h3>Đổi Mật Khẩu</h3>
       <input type="password" id="old-password" placeholder="Mật khẩu cũ" required>
       <input type="password" id="new-password" placeholder="Mật khẩu mới (ít nhất 6 ký tự)" required>
       <input type="password" id="confirm-new-password" placeholder="Nhập lại mật khẩu mới" required>
       <button id="submit-change-password">Xác nhận Đổi Mật Khẩu</button>
+    </div>
+  </div>
+
+  <!-- Modal tạo tài khoản mới -->
+  <div id="createUserModal" class="modal">
+    <div class="modal-content">
+      <span class="close" data-modal="createUserModal">&times;</span>
+      <h3>Tạo tài khoản mới</h3>
+      <input type="email" id="new-user-email" placeholder="Email người dùng mới" required>
+      <input type="password" id="new-user-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" required>
+      <button id="submit-create-user">Tạo tài khoản</button>
     </div>
   </div>
 
@@ -492,38 +482,63 @@
 
     const loginForm = document.getElementById('login-form');
     const authStatus = document.getElementById('auth-status');
-    const adminPanel = document.getElementById('admin-panel');
     const logoutBtn = document.getElementById('logout-btn');
     const changePasswordBtn = document.getElementById('change-password-btn');
+    const createUserBtn = document.getElementById('create-user-btn');
 
-    // Thêm các biến mới cho modal
+    // Các biến cho modal đổi mật khẩu
     const changePasswordModal = document.getElementById('changePasswordModal');
     const oldPasswordInput = document.getElementById('old-password');
     const newPasswordInput = document.getElementById('new-password');
     const confirmNewPasswordInput = document.getElementById('confirm-new-password');
     const submitChangePasswordBtn = document.getElementById('submit-change-password');
-    const closeModalSpan = document.querySelector('.modal .close');
+    
+    // Các biến cho modal tạo tài khoản
+    const createUserModal = document.getElementById('createUserModal');
+    const newUserEmailInput = document.getElementById('new-user-email');
+    const newUserPasswordInput = document.getElementById('new-user-password');
+    const submitCreateUserBtn = document.getElementById('submit-create-user');
+
+    const closeButtons = document.querySelectorAll('.modal .close');
 
     // Mở modal khi click nút "Đổi mật khẩu"
     changePasswordBtn.addEventListener('click', () => {
       changePasswordModal.style.display = 'block';
     });
 
-    // Đóng modal khi click nút 'x'
-    closeModalSpan.addEventListener('click', () => {
-      changePasswordModal.style.display = 'none';
-      oldPasswordInput.value = '';
-      newPasswordInput.value = '';
-      confirmNewPasswordInput.value = '';
+    // Mở modal khi click nút "Tạo tài khoản mới"
+    createUserBtn.addEventListener('click', () => {
+      createUserModal.style.display = 'block';
     });
-    
-    // Đóng modal khi click ra ngoài
+
+    // Đóng các modal khi click nút 'x' hoặc click ra ngoài
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modalId = btn.getAttribute('data-modal');
+        document.getElementById(modalId).style.display = 'none';
+        // Xóa rỗng các trường input
+        if (modalId === 'changePasswordModal') {
+          oldPasswordInput.value = '';
+          newPasswordInput.value = '';
+          confirmNewPasswordInput.value = '';
+        } else if (modalId === 'createUserModal') {
+          newUserEmailInput.value = '';
+          newUserPasswordInput.value = '';
+        }
+      });
+    });
+
     window.addEventListener('click', (e) => {
-      if (e.target === changePasswordModal) {
-        changePasswordModal.style.display = 'none';
-        oldPasswordInput.value = '';
-        newPasswordInput.value = '';
-        confirmNewPasswordInput.value = '';
+      if (e.target.classList.contains('modal')) {
+        e.target.style.display = 'none';
+        if (e.target.id === 'changePasswordModal') {
+          oldPasswordInput.value = '';
+          newPasswordInput.value = '';
+          confirmNewPasswordInput.value = '';
+        } else if (e.target.id === 'createUserModal') {
+          newUserEmailInput.value = '';
+          newUserPasswordInput.value = '';
+        }
       }
     });
 
@@ -571,6 +586,28 @@
       }
     });
 
+    // Xử lý tạo tài khoản mới
+    submitCreateUserBtn.addEventListener('click', () => {
+      const newUserEmail = newUserEmailInput.value;
+      const newUserPassword = newUserPasswordInput.value;
+
+      if (newUserEmail && newUserPassword.length >= 6) {
+        auth.createUserWithEmailAndPassword(newUserEmail, newUserPassword)
+          .then((cred) => {
+            console.log('Tài khoản mới đã được tạo:', cred.user);
+            alert('Tài khoản mới đã được tạo thành công!');
+            createUserModal.style.display = 'none';
+            newUserEmailInput.value = '';
+            newUserPasswordInput.value = '';
+          })
+          .catch(err => {
+            alert('Tạo tài khoản thất bại: ' + err.message);
+          });
+      } else {
+        alert('Vui lòng nhập email và mật khẩu hợp lệ (ít nhất 6 ký tự).');
+      }
+    });
+
     // Xử lý đăng nhập
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -593,32 +630,9 @@
       auth.signOut().then(() => {
         console.log('Người dùng đã đăng xuất.');
         alert('Đã đăng xuất.');
-        // Xóa rỗng các trường input sau khi đăng xuất
         document.getElementById('login-email').value = '';
         document.getElementById('login-password').value = '';
       });
-    });
-
-    // Admin: Tạo tài khoản mới
-    document.getElementById('create-user-btn').addEventListener('click', () => {
-      const newUserEmail = document.getElementById('new-user-email').value;
-      const newUserPassword = document.getElementById('new-user-password').value;
-
-      if (newUserEmail && newUserPassword.length >= 6) {
-        auth.createUserWithEmailAndPassword(newUserEmail, newUserPassword)
-          .then((cred) => {
-            console.log('Tài khoản mới đã được tạo:', cred.user);
-            alert('Tài khoản mới đã được tạo thành công!');
-            // Reset form
-            document.getElementById('new-user-email').value = '';
-            document.getElementById('new-user-password').value = '';
-          })
-          .catch(err => {
-            alert('Tạo tài khoản thất bại: ' + err.message);
-          });
-      } else {
-        alert('Vui lòng nhập email và mật khẩu hợp lệ (ít nhất 6 ký tự).');
-      }
     });
 
     // Lắng nghe trạng thái đăng nhập
@@ -632,9 +646,9 @@
 
         // Kiểm tra quyền Admin
         if (user.email === 'admin@myapp.com') {
-          adminPanel.style.display = 'flex';
+          createUserBtn.style.display = 'block';
         } else {
-          adminPanel.style.display = 'none';
+          createUserBtn.style.display = 'none';
         }
       } else {
         // Chưa đăng nhập
@@ -642,7 +656,7 @@
         loginForm.style.display = 'flex';
         logoutBtn.style.display = 'none';
         changePasswordBtn.style.display = 'none';
-        adminPanel.style.display = 'none';
+        createUserBtn.style.display = 'none';
       }
     });
   </script>
