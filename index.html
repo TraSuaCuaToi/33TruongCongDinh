@@ -106,21 +106,15 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, addDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- Firebase Setup ---
-    // Make sure to replace this with your actual Firebase config
-    const firebaseConfig = {
-      apiKey: "",
-      authDomain: "trasua-4a1d9.firebaseapp.com",
-      projectId: "trasua-4a1d9",
-      storageBucket: "trasua-4a1d9.appspot.com",
-      messagingSenderId: "210496424940",
-      appId: "1:210496424940:web:b84d326448cc7fcb790ec9",
-      measurementId: "G-9R75DB010Y"
-    };
-    
+    // Global variables provided by the Canvas environment. DO NOT change these.
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
@@ -128,8 +122,7 @@
     // --- Global Variables ---
     let userId = null;
     let userRole = 'guest';
-    const FIREBASE_APP_ID = "trasua-4a1d9";
-    const PUBLIC_ORDERS_PATH = `artifacts/${FIREBASE_APP_ID}/public/data/orders`;
+    const PUBLIC_ORDERS_PATH = `artifacts/${appId}/public/data/orders`;
 
     // --- DOM Elements ---
     const grid = document.getElementById("menu");
@@ -192,6 +185,17 @@
         desc: "Sô-cô-la ngọt ngào, hòa quyện cùng sữa tươi."
       },
       {
+        img: "Trà sữa 4.png",
+        name: "Trà sữa Truyền thống",
+        group: "Trà Sữa",
+        options: [
+          { size: "M", price: 25000 },
+          { size: "L", price: 27000 },
+          { size: "XL", price: 30000 },
+        ],
+        desc: "Trà sữa Truyền thống kết hợp trân châu đen."
+      },
+      {
         img: "Topping 3.png",
         name: "Topping A",
         group: "Topping",
@@ -201,6 +205,7 @@
       // Bạn có thể thêm món mới ở đây
     ];
 
+    // Đường dẫn gốc cho hình ảnh. Đường dẫn này sẽ hoạt động khi tệp ảnh và tệp index.html ở cùng một thư mục.
     const IMAGE_BASE = "./";
     
     // --- Helper Functions ---
@@ -420,7 +425,7 @@
     function init() {
       // Falling elements
       const fallingContainer = document.getElementById("falling-container");
-      const symbols = ['🌸', '🌼', '🌺', '✨', '🌷', '🌻', '🍀', '🌹', '�', '🍃', '❄️', '💮'];
+      const symbols = ['🌸', '🌼', '🌺', '✨', '🌷', '🌻', '🍀', '🌹', '🍂', '🍃', '❄️', '💮'];
       function createFallingElement() {
         const element = document.createElement('div');
         element.className = 'falling-element';
@@ -471,18 +476,20 @@
         showLogBtn.classList.add('hidden');
       }
     });
-
-    // Auto sign in anonymously on first load
-    (async () => {
-      try {
-        await signInAnonymously(auth);
-      } catch (error) {
-        console.error("Anonymous sign-in failed:", error);
-      }
-    })();
     
     window.onload = init;
+
+    // Authenticate with custom token if available
+    if (initialAuthToken) {
+        signInWithCustomToken(auth, initialAuthToken).catch(error => {
+            console.error("Lỗi đăng nhập bằng token:", error);
+            // Fallback to rendering auth UI if token fails
+            renderAuthUI();
+        });
+    } else {
+        // Render auth UI if no token is provided
+        renderAuthUI();
+    }
   </script>
 </body>
 </html>
-�
