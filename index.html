@@ -3,126 +3,337 @@
 <head>
   <meta charset="utf-8">
   <title>Menu Trà Sữa</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; display:flex; min-height:100vh; }
-    .sidebar { width:200px; background:#f8f8f8; padding:20px; box-shadow:2px 0 6px rgba(0,0,0,0.1); }
-    .main { margin-left:220px; padding:20px; flex:1; }
-    .login-box { text-align:center; margin-bottom:20px; }
-    .login-box input { padding:8px; margin:4px; width:200px; }
-    .login-box button { padding:8px 16px; margin:4px; background:#e63946; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-    .login-box button:hover { background:#c62828; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      padding:0;
+      margin:0;
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 200px;
+      background: #f8f8f8;
+      padding: 20px;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+    .sidebar h3 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: #e63946;
+    }
+    .sidebar button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: none;
+      background: #ffe4e9;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .sidebar button:hover {
+      background: #e63946;
+      color: white;
+    }
+
+    .main {
+      margin-left: 220px; /* chừa chỗ cho sidebar */
+      padding: 20px;
+      width: 100%;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+      gap:18px;
+      background-color: #ffe4e9; /* Nền màu hồng nhạt */
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .card {
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:8px;
+      overflow:hidden;
+      box-shadow:0 2px 6px rgba(0,0,0,.1);
+      display:flex;
+      flex-direction:column;
+    }
+    .card img {
+      width:100%;
+      height:160px;
+      object-fit:cover;
+      display:block;
+    }
+    .info {
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .name {
+      font-weight:bold;
+      font-size:16px;
+    }
+    .meta {
+      font-size:14px;
+      color:#555;
+    }
+    .price {
+      font-weight:bold;
+      color:#e63946;
+    }
+    .desc {
+      font-size:14px;
+      color:#444;
+      line-height:1.4;
+      white-space:pre-line;
+      margin-top:6px;
+    }
+
+    /* CSS cho tên và địa chỉ quán */
+    .store-info {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #e63949;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .store-name {
+      font-family: 'Dancing Script', cursive;
+      font-size: 5rem;
+      color: #8e44ad;
+      margin: 0;
+      line-height: 1.2;
+    }
+    .store-address {
+      font-size: 1.2rem;
+      margin-top: 5px;
+      color: #555;
+    }
+
+    h2 {
+      text-align: center;
+      color: #e63946;
+      margin: 20px 0;
+      font-size: 2.5rem;
+      font-family: 'Dancing Script', cursive;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* Hiệu ứng hoa rơi */
+    @keyframes fall {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+    .falling-element {
+      position: fixed;
+      top: 0;
+      left: 0;
+      font-size: 2rem;
+      pointer-events: none;
+      z-index: 100;
+      animation: fall linear infinite;
+    }
+
+    /* CSS cho phần đăng nhập */
+    .auth-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .auth-form input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .auth-form button {
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #e63946;
+      color: white;
+    }
+    .auth-form button:hover {
+      background: #d42c38;
+    }
+
+    .admin-panel {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+      background: #e9f5e9;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #4CAF50;
+    }
+    .admin-panel input, .admin-panel button {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .admin-panel button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .admin-panel button:hover {
+      background: #45a049;
+    }
+
+    #auth-status {
+      font-size: 0.9rem;
+      color: #333;
+    }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="sidebar">
     <h3>Nhóm món</h3>
     <div id="group-list"></div>
+    <div id="auth-controls" style="margin-top: 20px;">
+      <button id="logout-btn" style="display: none;">Đăng xuất</button>
+      <button id="change-password-btn" style="display: none;">Đổi mật khẩu</button>
+    </div>
   </div>
 
   <div class="main">
-    <div class="login-box">
-      <h2>Đăng nhập</h2>
-      <input type="text" id="email" placeholder="Email hoặc Admin"><br>
-      <input type="password" id="password" placeholder="Mật khẩu"><br>
-      <button onclick="signUp()">Tạo tài khoản</button>
-      <button onclick="signIn()">Đăng nhập</button>
-      <button onclick="signOutUser()">Đăng xuất</button>
-      <button onclick="resetPassword()">Đổi mật khẩu</button>
-      <p id="user-info"></p>
-    </div>
-
     <div id="falling-container"></div>
     <div class="store-info">
       <h1 class="store-name">Trà Sữa Của Tôi</h1>
       <p class="store-address">33 Tôn Đức Thắng, Đà Nẵng</p>
     </div>
 
+    <div class="auth-container">
+      <div id="auth-status">Bạn chưa đăng nhập.</div>
+      <form id="login-form" class="auth-form">
+        <h3>Đăng nhập</h3>
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Mật khẩu" required>
+        <button type="submit">Đăng nhập</button>
+      </form>
+      
+      <div id="admin-panel" class="admin-panel">
+        <h3>Tạo tài khoản mới</h3>
+        <input type="email" id="new-user-email" placeholder="Email người dùng mới" required>
+        <input type="password" id="new-user-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" required>
+        <button id="create-user-btn">Tạo tài khoản</button>
+      </div>
+    </div>
+
     <h2>Menu Trà Sữa</h2>
     <div id="menu" class="grid"></div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+  
   <script>
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyARctBmqbmoL9KPT2snk7aKebxJ-SKoMbQ",
-      authDomain: "trasua-4a1d9.firebaseapp.com",
-      projectId: "trasua-4a1d9",
-      storageBucket: "trasua-4a1d9.firebasestorage.app",
-      messagingSenderId: "210496424940",
-      appId: "1:210496424940:web:b84d326448cc7fcb790ec9",
-      measurementId: "G-9R75DB010Y"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // Hàm chuẩn hoá email: thêm @myapp.com nếu thiếu
-    function formatEmail(input){
-      if(!input.includes("@")){
-        return input+"@myapp.com";
-      }
-      return input;
-    }
-
-    function signUp(){
-      let email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      email = formatEmail(email);
-      // Chỉ admin mới được tạo tài khoản mới
-      if(auth.currentUser && auth.currentUser.email === "admin@myapp.com"){
-        auth.createUserWithEmailAndPassword(email,password)
-          .then(userCredential=>{
-            document.getElementById("user-info").innerText="Tạo tài khoản thành công: "+userCredential.user.email;
-          })
-          .catch(error=>{ document.getElementById("user-info").innerText=error.message; });
-      } else {
-        document.getElementById("user-info").innerText="Chỉ admin mới có quyền tạo tài khoản mới.";
-      }
-    }
-
-    function signIn(){
-      let email=document.getElementById("email").value.trim();
-      const password=document.getElementById("password").value;
-      email = formatEmail(email);
-      auth.signInWithEmailAndPassword(email,password)
-        .then(userCredential=>{
-          document.getElementById("user-info").innerText="Đăng nhập thành công: "+userCredential.user.email;
-        })
-        .catch(error=>{ document.getElementById("user-info").innerText=error.message; });
-    }
-
-    function signOutUser(){
-      auth.signOut().then(()=>{ document.getElementById("user-info").innerText="Đã đăng xuất."; });
-    }
-
-    function resetPassword(){
-      let email=document.getElementById("email").value.trim();
-      email = formatEmail(email);
-      auth.sendPasswordResetEmail(email)
-        .then(()=>{ document.getElementById("user-info").innerText="Email đặt lại mật khẩu đã gửi đến: "+email; })
-        .catch(error=>{ document.getElementById("user-info").innerText=error.message; });
-    }
-
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        document.getElementById("user-info").innerText="Đang đăng nhập: "+user.email;
-      } else {
-        document.getElementById("user-info").innerText="Chưa đăng nhập.";
-      }
-    });
-
-    // ====== Phần code menu giữ nguyên từ file gốc ======
     const MENU = [
-      { img: "Trà sữa 1.png", name: "Trà Sữa Dâu", group: "Trà Sữa", options:[{size:"M",price:10000},{size:"L",price:12000},{size:"XL",price:15000}], desc:"Trà sữa truyền thống kèm trân châu đen." },
-      { img: "Trà sữa 2.png", name: "Matcha latte", group: "Trà Sữa", options:[{size:"M",price:29000},{size:"L",price:30000},{size:"XL",price:32000}], desc:"Matcha Nhật Bản thanh mát." },
-      { img: "Topping 1.png", name: "Topping Dừa", group: "Topping", options:[{size:"",price:7000}], desc:"Ngon giòn béo nhẹ." },
-      { img: "Topping 2.png", name: "Topping Nha Đam", group: "Topping", options:[{size:"",price:5000}], desc:"Mát lạnh, giòn sần sật." },
-      { img: "Trà sữa 3.png", name: "Sô-cô-la sữa", group: "Trà Sữa", options:[{size:"M",price:25000},{size:"L",price:27000},{size:"XL",price:30000}], desc:"Sô-cô-la ngọt ngào." },
-      { img: "Topping 3.png", name: "Topping A", group: "Topping", options:[{size:"",price:7000}], desc:"Mô tả topping A" }
+      // món 1
+      {
+        img: "Trà sữa 1.png",
+        name: "Trà Sữa Dâu",
+        group: "Trà Sữa",
+        options: [
+          { size: "M", price: 10000 },
+          { size: "L", price: 12000 },
+          { size: "XL", price: 15000 },
+        ],
+        desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
+      },
+      // món 2
+      {
+        img: "Trà sữa 2.png",
+        name: "Matcha latte",
+        group: "Trà Sữa",
+        options: [
+          { size: "M", price: 29000 },
+          { size: "L", price: 30000 },
+          { size: "XL", price: 32000 },
+        ],
+        desc: "Matcha Nhật Bản thanh mát.Kết hợp sữa tươi béo nhẹ, thơm dịu."
+      },
+      // món 3
+      {
+        img: "Topping 1.png",
+        name: "Topping Dừa",
+        group: "Topping",
+        options: [ { size: "", price: 7000 } ],
+        desc: "Ngon giòn béo nhẹ."
+      },
+      // món 4
+      {
+        img: "Topping 2.png",
+        name: "Topping Nha Đam",
+        group: "Topping",
+        options: [ { size: "", price: 5000 } ],
+        desc: "Mát lạnh, giòn sần sật."
+      },
+      // món 5
+      {
+        img: "Trà sữa 3.png",
+        name: "Sô-cô-la sữa",
+        group: "Trà Sữa",
+        options: [
+          { size: "M", price: 25000 },
+          { size: "L", price: 27000 },
+          { size: "XL", price: 30000 },
+        ],
+        desc: "Sô-cô-la ngọt ngào, hòa quyện cùng sữa tươi."
+      },
+      // món 6
+      {
+        img: "Topping 3.png",
+        name: "Topping A",
+        group: "Topping",
+        options: [ { size: "", price: 7000 } ],
+        desc: "Mô tả cái gì đó ...về topping A.."
+      }
     ];
 
     const IMAGE_BASE = "./";
+
+    function getRandomPastelColor() {
+      const hue = Math.floor(Math.random() * 360);
+      const saturation = 70 + Math.random() * 20;
+      const lightness = 85 + Math.random() * 10;
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    }
+
     const grid = document.getElementById("menu");
     const groupList = document.getElementById("group-list");
 
@@ -139,7 +350,7 @@
       MENU.filter(item => item.group === group).forEach(item => {
         const card = document.createElement("div");
         card.className = "card";
-        card.style.backgroundColor = "#fff8f8";
+        card.style.backgroundColor = getRandomPastelColor();
 
         let optionsHTML = "";
         item.options.forEach(opt => {
@@ -157,7 +368,136 @@
         grid.appendChild(card);
       });
     }
+
+    // render nhóm đầu tiên mặc định
     renderMenu(groups[0]);
+
+    // hiệu ứng hoa rơi
+    const fallingContainer = document.getElementById("falling-container");
+    const symbols = ['🌸','🌼','🌺','✨','🌷','🌻','🍀','🌹','🍂','🍃','❄️','💮'];
+
+    function createFallingElement() {
+      const element = document.createElement('div');
+      element.className = 'falling-element';
+      element.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      element.style.left = `${Math.random() * 100}vw`;
+      element.style.animationDuration = `${Math.random() * 5 + 5}s`;
+      element.style.animationDelay = `-${Math.random() * 5}s`;
+      fallingContainer.appendChild(element);
+      setTimeout(() => element.remove(), 10000);
+    }
+
+    for (let i = 0; i < 30; i++) createFallingElement();
+    setInterval(createFallingElement, 1000);
+
+    // Bắt đầu phần code Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyARctBmqbmoL9KPT2snk7aKebxJ-SKoMbQ",
+      authDomain: "trasua-4a1d9.firebaseapp.com",
+      projectId: "trasua-4a1d9",
+      storageBucket: "trasua-4a1d9.firebasestorage.app",
+      messagingSenderId: "210496424940",
+      appId: "1:210496424940:web:b84d326448cc7fcb790ec9",
+      measurementId: "G-9R75DB010Y"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const loginForm = document.getElementById('login-form');
+    const authStatus = document.getElementById('auth-status');
+    const adminPanel = document.getElementById('admin-panel');
+    const logoutBtn = document.getElementById('logout-btn');
+    const changePasswordBtn = document.getElementById('change-password-btn');
+
+    // Xử lý đăng nhập
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = loginForm['login-email'].value;
+      const password = loginForm['login-password'].value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((cred) => {
+          console.log('Người dùng đã đăng nhập:', cred.user);
+          alert('Đăng nhập thành công!');
+        })
+        .catch(err => {
+          console.error(err.message);
+          alert('Đăng nhập thất bại: ' + err.message);
+        });
+    });
+
+    // Xử lý đăng xuất
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        console.log('Người dùng đã đăng xuất.');
+        alert('Đã đăng xuất.');
+      });
+    });
+
+    // Xử lý đổi mật khẩu (gửi email reset)
+    changePasswordBtn.addEventListener('click', () => {
+      const user = auth.currentUser;
+      if (user) {
+        auth.sendPasswordResetEmail(user.email)
+          .then(() => {
+            alert('Một email đặt lại mật khẩu đã được gửi đến địa chỉ của bạn.');
+          })
+          .catch(err => {
+            alert('Lỗi: ' + err.message);
+          });
+      } else {
+        alert('Bạn cần đăng nhập để đổi mật khẩu.');
+      }
+    });
+
+    // Admin: Tạo tài khoản mới
+    document.getElementById('create-user-btn').addEventListener('click', () => {
+      const newUserEmail = document.getElementById('new-user-email').value;
+      const newUserPassword = document.getElementById('new-user-password').value;
+
+      if (newUserEmail && newUserPassword.length >= 6) {
+        auth.createUserWithEmailAndPassword(newUserEmail, newUserPassword)
+          .then((cred) => {
+            console.log('Tài khoản mới đã được tạo:', cred.user);
+            alert('Tài khoản mới đã được tạo thành công!');
+            // Reset form
+            document.getElementById('new-user-email').value = '';
+            document.getElementById('new-user-password').value = '';
+          })
+          .catch(err => {
+            alert('Tạo tài khoản thất bại: ' + err.message);
+          });
+      } else {
+        alert('Vui lòng nhập email và mật khẩu hợp lệ (ít nhất 6 ký tự).');
+      }
+    });
+
+    // Lắng nghe trạng thái đăng nhập
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        // Đã đăng nhập
+        authStatus.textContent = `Chào mừng, ${user.email}!`;
+        loginForm.style.display = 'none';
+        logoutBtn.style.display = 'block';
+        changePasswordBtn.style.display = 'block';
+
+        // Kiểm tra quyền Admin
+        if (user.email === 'admin@myapp.com') {
+          adminPanel.style.display = 'flex';
+        } else {
+          adminPanel.style.display = 'none';
+        }
+      } else {
+        // Chưa đăng nhập
+        authStatus.textContent = 'Bạn chưa đăng nhập.';
+        loginForm.style.display = 'flex';
+        logoutBtn.style.display = 'none';
+        changePasswordBtn.style.display = 'none';
+        adminPanel.style.display = 'none';
+      }
+    });
   </script>
 </body>
 </html>
