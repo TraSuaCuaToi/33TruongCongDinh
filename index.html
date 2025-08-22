@@ -69,6 +69,7 @@
       box-shadow:0 2px 6px rgba(0,0,0,.1);
       display:flex;
       flex-direction:column;
+      position: relative; /* Thêm position relative để đặt nút Order */
     }
     .card img {
       width:100%;
@@ -100,6 +101,22 @@
       line-height:1.4;
       white-space:pre-line;
       margin-top:6px;
+    }
+    .order-button {
+      background-color: #e63946;
+      color: white;
+      border: none;
+      padding: 8px;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 0 0 8px 8px;
+      width: 100%;
+    }
+    .order-button:hover {
+      background-color: #d42c38;
     }
 
     /* CSS cho tên và địa chỉ quán */
@@ -201,7 +218,7 @@
       color: #333;
     }
     
-    /* CSS cho popup đổi mật khẩu và tạo tài khoản */
+    /* CSS cho popup đổi mật khẩu, tạo tài khoản và đặt hàng */
     .modal {
       display: none;
       position: fixed;
@@ -232,8 +249,20 @@
       margin-top: 0;
       color: #e63946;
     }
-
-    .modal-content input {
+    
+    .modal-content .order-item {
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+    .modal-content .order-item:last-child {
+        border-bottom: none;
+    }
+    .modal-content .order-item h4 {
+        margin: 0 0 5px 0;
+        color: #e63946;
+    }
+    .modal-content input, .modal-content textarea, .modal-content select {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
@@ -271,6 +300,39 @@
       text-decoration: none;
       cursor: pointer;
     }
+
+    /* CSS cho danh sách đơn hàng */
+    #order-list-container {
+      display: none; /* Mặc định ẩn, chỉ hiện khi user đăng nhập */
+      margin-top: 40px;
+      background-color: #f8f8f8;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .order-card {
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:8px;
+      padding:15px;
+      margin-bottom:15px;
+      box-shadow:0 1px 3px rgba(0,0,0,.1);
+    }
+    .order-card h4 {
+      margin-top: 0;
+      color: #e63946;
+    }
+    .order-item-detail {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+    .order-meta {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 10px;
+      border-top: 1px dashed #ccc;
+      padding-top: 10px;
+    }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -306,6 +368,12 @@
 
     <h2>Menu Trà Sữa</h2>
     <div id="menu" class="grid"></div>
+
+    <!-- Container danh sách đơn hàng -->
+    <div id="order-list-container">
+      <h2>Danh Sách Đơn Hàng</h2>
+      <div id="order-list">Không có đơn hàng nào.</div>
+    </div>
   </div>
 
   <!-- Modal đổi mật khẩu -->
@@ -328,6 +396,20 @@
       <input type="email" id="new-user-email" placeholder="Email người dùng mới" required>
       <input type="password" id="new-user-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" required>
       <button id="submit-create-user">Tạo tài khoản</button>
+    </div>
+  </div>
+
+  <!-- Modal đặt hàng -->
+  <div id="orderModal" class="modal">
+    <div class="modal-content">
+      <span class="close" data-modal="orderModal">&times;</span>
+      <h3>Thông Tin Đơn Hàng</h3>
+      <div id="order-form-items"></div>
+      <div style="margin-top: 15px;">
+        <label for="notes">Ghi chú:</label>
+        <textarea id="notes" placeholder="Ví dụ: Ít đường, thêm đá..."></textarea>
+      </div>
+      <button id="submit-order">Xác nhận Đặt Hàng</button>
     </div>
   </div>
 
@@ -411,6 +493,8 @@
 
     const grid = document.getElementById("menu");
     const groupList = document.getElementById("group-list");
+    const orderListContainer = document.getElementById("order-list-container");
+    const orderList = document.getElementById("order-list");
 
     const groups = [...new Set(MENU.map(item => item.group))];
     groups.forEach(group => {
@@ -439,8 +523,13 @@
             ${optionsHTML}
             <div class="desc">${item.desc || ""}</div>
           </div>
+          <button class="order-button" data-name="${item.name}" data-group="${item.group}">Đặt Hàng</button>
         `;
         grid.appendChild(card);
+      });
+      // Gán sự kiện cho các nút Order sau khi render
+      document.querySelectorAll('.order-button').forEach(button => {
+        button.addEventListener('click', handleOrderClick);
       });
     }
 
@@ -479,6 +568,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const ordersCollection = db.collection('orders');
 
     const loginForm = document.getElementById('login-form');
     const authStatus = document.getElementById('auth-status');
@@ -499,6 +589,12 @@
     const newUserPasswordInput = document.getElementById('new-user-password');
     const submitCreateUserBtn = document.getElementById('submit-create-user');
 
+    // Các biến cho modal đặt hàng
+    const orderModal = document.getElementById('orderModal');
+    const orderFormItems = document.getElementById('order-form-items');
+    const notesInput = document.getElementById('notes');
+    const submitOrderBtn = document.getElementById('submit-order');
+
     const closeButtons = document.querySelectorAll('.modal .close');
 
     // Mở modal khi click nút "Đổi mật khẩu"
@@ -509,6 +605,75 @@
     // Mở modal khi click nút "Tạo tài khoản mới"
     createUserBtn.addEventListener('click', () => {
       createUserModal.style.display = 'block';
+    });
+
+    // Xử lý click nút đặt hàng
+    function handleOrderClick(e) {
+      const itemName = e.target.getAttribute('data-name');
+      const item = MENU.find(m => m.name === itemName);
+
+      if (item) {
+        orderFormItems.innerHTML = ''; // Xóa nội dung cũ
+        notesInput.value = '';
+
+        const itemHTML = `
+            <div class="order-item">
+                <h4>${item.name}</h4>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label for="size-${itemName}">Size:</label>
+                    <select id="size-${itemName}">
+                        ${item.options.map(opt => `<option value="${opt.size}">${opt.size || 'N/A'}</option>`).join('')}
+                    </select>
+                    <label for="qty-${itemName}">Số lượng:</label>
+                    <input type="number" id="qty-${itemName}" value="1" min="1" style="width: 60px;">
+                </div>
+            </div>
+        `;
+        orderFormItems.innerHTML = itemHTML;
+        orderModal.style.display = 'block';
+      }
+    }
+
+    // Xử lý submit đơn hàng
+    submitOrderBtn.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      const orderItems = [];
+      
+      const item = MENU.find(m => m.name === orderFormItems.querySelector('h4').textContent);
+      const selectedSize = document.getElementById(`size-${item.name}`).value;
+      const quantity = parseInt(document.getElementById(`qty-${item.name}`).value, 10);
+      const notes = notesInput.value;
+
+      if (!quantity || quantity < 1) {
+        alert('Số lượng không hợp lệ.');
+        return;
+      }
+      
+      const priceOption = item.options.find(opt => opt.size === selectedSize);
+      
+      orderItems.push({
+          name: item.name,
+          size: selectedSize,
+          quantity: quantity,
+          price: priceOption ? priceOption.price : 0
+      });
+      
+      const newOrder = {
+        userId: user ? user.uid : 'Khách',
+        userName: user ? user.email : 'Khách',
+        items: orderItems,
+        notes: notes,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        await ordersCollection.add(newOrder);
+        alert('Đơn hàng của bạn đã được gửi thành công!');
+        orderModal.style.display = 'none';
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        alert('Gửi đơn hàng thất bại. Vui lòng thử lại.');
+      }
     });
 
     // Đóng các modal khi click nút 'x' hoặc click ra ngoài
@@ -538,6 +703,9 @@
         } else if (e.target.id === 'createUserModal') {
           newUserEmailInput.value = '';
           newUserPasswordInput.value = '';
+        } else if (e.target.id === 'orderModal') {
+          notesInput.value = '';
+          // Có thể reset các input của order form nếu cần
         }
       }
     });
@@ -643,12 +811,18 @@
         loginForm.style.display = 'none';
         logoutBtn.style.display = 'block';
         changePasswordBtn.style.display = 'block';
-
+        orderListContainer.style.display = 'block';
+        
         // Kiểm tra quyền Admin
         if (user.email === 'admin@myapp.com') {
           createUserBtn.style.display = 'block';
+          // Nếu là admin, lắng nghe tất cả đơn hàng
+          listenForOrders(ordersCollection);
         } else {
           createUserBtn.style.display = 'none';
+          // Nếu không phải admin, chỉ hiển thị đơn hàng của user đó (nếu có)
+          // Hiện tại yêu cầu chỉ admin mới thấy, nên không cần listen
+          orderList.innerHTML = 'Bạn không có quyền xem danh sách đơn hàng.';
         }
       } else {
         // Chưa đăng nhập
@@ -657,8 +831,62 @@
         logoutBtn.style.display = 'none';
         changePasswordBtn.style.display = 'none';
         createUserBtn.style.display = 'none';
+        orderListContainer.style.display = 'none';
+        
+        // Dừng lắng nghe nếu có
+        if (typeof unsubscribe !== 'undefined') {
+          unsubscribe();
+        }
       }
     });
+
+    let unsubscribe;
+    function listenForOrders(collection) {
+        // Dừng lắng nghe trước đó nếu có
+        if (typeof unsubscribe !== 'undefined') {
+            unsubscribe();
+        }
+
+        // Lắng nghe đơn hàng theo thời gian tạo
+        unsubscribe = collection.orderBy("timestamp", "desc").onSnapshot(snapshot => {
+            if (snapshot.empty) {
+                orderList.innerHTML = 'Không có đơn hàng nào.';
+                return;
+            }
+            orderList.innerHTML = '';
+            snapshot.forEach(doc => {
+                const orderData = doc.data();
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                
+                let itemsHTML = '';
+                orderData.items.forEach(item => {
+                    itemsHTML += `
+                        <div class="order-item-detail">
+                            ${item.quantity} x ${item.name} (${item.size ? `Size: ${item.size}` : 'Không size'})
+                            <span style="font-weight: bold; color: #e63946;">
+                                ${(item.price * item.quantity).toLocaleString('vi-VN')}₫
+                            </span>
+                        </div>
+                    `;
+                });
+                
+                const timestamp = orderData.timestamp ? orderData.timestamp.toDate().toLocaleString('vi-VN') : 'Đang cập nhật...';
+
+                orderCard.innerHTML = `
+                    <h4>Đơn hàng của ${orderData.userName}</h4>
+                    <div>${itemsHTML}</div>
+                    ${orderData.notes ? `<div>Ghi chú: ${orderData.notes}</div>` : ''}
+                    <div class="order-meta">Thời gian: ${timestamp}</div>
+                `;
+                orderList.appendChild(orderCard);
+            });
+        }, err => {
+            console.error('Lỗi khi lấy đơn hàng:', err);
+            orderList.innerHTML = 'Lỗi khi tải đơn hàng. Vui lòng kiểm tra console.';
+        });
+    }
+
   </script>
 </body>
 </html>
