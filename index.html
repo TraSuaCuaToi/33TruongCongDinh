@@ -5,18 +5,24 @@
   <title>Menu Trà Sữa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Bố cục cơ bản */
+    /* Reset CSS cơ bản và font */
     body {
       font-family: Arial, sans-serif;
       background-color: white;
       padding: 0;
       margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
     }
 
-    /* Header trên cùng */
+    /* Bố cục cố định, không co giãn */
+    .app-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* Ngăn cuộn ngang và cuộn dọc không mong muốn */
+    }
+
+    /* Header cố định trên cùng */
     .header {
       width: 100%;
       background-color: #f8f8f8;
@@ -25,9 +31,7 @@
       justify-content: flex-end;
       gap: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      flex-shrink: 0;
     }
     .header button {
       padding: 10px 15px;
@@ -41,12 +45,13 @@
       background: #e63946;
       color: white;
     }
-
-    /* Vùng chứa thông tin quán */
+    
+    /* Vùng thông tin quán cố định */
     .store-info-section {
       text-align: center;
       padding: 20px;
       background-color: #ffe4e9;
+      flex-shrink: 0;
     }
     .store-name-main {
       font-family: 'Dancing Script', cursive;
@@ -61,14 +66,14 @@
       color: #555;
     }
 
-    /* Vùng chứa nội dung chính */
+    /* Vùng chứa nội dung chính - luôn chiếm không gian còn lại */
     .content-container {
       display: flex;
-      flex-direction: row; /* Luôn là hàng ngang */
       flex-grow: 1;
+      flex-shrink: 1;
     }
 
-    /* Sidebar cố định */
+    /* Sidebar cố định bên trái */
     .sidebar {
       width: 200px;
       background: #f8f8f8;
@@ -76,9 +81,6 @@
       box-shadow: 2px 0 6px rgba(0,0,0,0.1);
       overflow-y: auto;
       flex-shrink: 0;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
     }
     .sidebar h3 {
       margin-top: 0;
@@ -101,15 +103,15 @@
       color: white;
     }
 
-    /* Nội dung chính */
+    /* Nội dung chính ở giữa, có thể cuộn */
     .main {
       padding: 20px;
       flex-grow: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow-x: hidden;
-      position: relative;
+      overflow-y: auto; /* Cho phép cuộn dọc */
+      overflow-x: hidden; /* Ngăn cuộn ngang */
     }
     .grid {
       display: grid;
@@ -428,34 +430,35 @@
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-  
-  <div class="header">
-      <button id="auth-button">Đăng nhập</button>
-      <button id="cart-button">Giỏ Hàng (<span id="cart-count">0</span>)</button>
-  </div>
-  
-  <div class="store-info-section">
-      <div id="falling-container"></div>
-      <h1 class="store-name-main">Trà Sữa Của Tôi</h1>
-      <p class="store-address">33 Tôn Đức Thắng, Đà Nẵng</p>
-  </div>
-  
-  <div class="content-container">
-      <!-- Sidebar luôn hiển thị -->
-      <div class="sidebar" id="group-sidebar">
-          <h3>Nhóm món</h3>
-          <div id="group-list"></div>
-      </div>
-      
-      <div class="main">
-          <h2>Menu Trà Sữa</h2>
-          <div id="menu" class="grid"></div>
-          
-          <div id="order-list-container">
-            <h2>Danh Sách Đơn Hàng</h2>
-            <div id="order-list">Không có đơn hàng nào.</div>
-          </div>
-      </div>
+  <div class="app-container">
+    <div class="header">
+        <button id="auth-button">Đăng nhập</button>
+        <button id="cart-button">Giỏ Hàng (<span id="cart-count">0</span>)</button>
+    </div>
+    
+    <div class="store-info-section">
+        <div id="falling-container"></div>
+        <h1 class="store-name-main">Trà Sữa Của Tôi</h1>
+        <p class="store-address">33 Tôn Đức Thắng, Đà Nẵng</p>
+    </div>
+    
+    <div class="content-container">
+        <!-- Sidebar luôn hiển thị -->
+        <div class="sidebar" id="group-sidebar">
+            <h3>Nhóm món</h3>
+            <div id="group-list"></div>
+        </div>
+        
+        <div class="main">
+            <h2>Menu Trà Sữa</h2>
+            <div id="menu" class="grid"></div>
+            
+            <div id="order-list-container">
+              <h2>Danh Sách Đơn Hàng</h2>
+              <div id="order-list">Không có đơn hàng nào.</div>
+            </div>
+        </div>
+    </div>
   </div>
 
   <div id="authModal" class="modal">
