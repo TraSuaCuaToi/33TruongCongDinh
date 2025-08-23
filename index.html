@@ -33,6 +33,8 @@
       top: 0;
       left: 0;
       z-index: 1000;
+      height: 60px; /* Thêm chiều cao để tính toán margin */
+      box-sizing: border-box;
     }
     .header button {
       padding: 10px 15px;
@@ -51,9 +53,15 @@
       color: #e63946;
       margin-right: 15px;
     }
+    .main-content-wrapper {
+        padding-top: 60px; /* Thêm padding để đẩy nội dung xuống dưới header cố định */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
     .store-info-section {
       text-align: center;
-      padding: 60px 20px 20px;
+      padding: 20px;
       background-color: #ffe4e9;
       flex-shrink: 0;
     }
@@ -572,38 +580,40 @@
       </div>
       <button id="manage-menu-btn" style="display:none;">Quản lý Món</button>
     </div>
-    <div class="store-info-section">
-      <div id="falling-container"></div>
-      <h1 class="store-name-main">Trà Sữa Của Tôi</h1>
-      <p class="store-address">33 Tôn Đức Thắng, Đà Nẵng</p>
-    </div>
-    <div class="content-container">
-      <div class="sidebar" id="group-sidebar">
-        <button class="sidebar-close-btn">&times;</button>
-        <h3>Nhóm món</h3>
-        <div id="group-list"></div>
+    <div class="main-content-wrapper">
+      <div class="store-info-section">
+        <div id="falling-container"></div>
+        <h1 class="store-name-main">Trà Sữa Của Tôi</h1>
+        <p class="store-address">33 Tôn Đức Thắng, Đà Nẵng</p>
       </div>
-      <div id="overlay" class="overlay"></div>
-      <div class="main">
-        <h2>Menu Trà Sữa</h2>
-        <div id="menu" class="grid"></div>
-        <div id="order-search-section" style="margin-top: 40px; width: 100%; max-width: 1200px;">
-          <h2 style="margin-bottom: 10px;">Tra cứu Đơn Hàng</h2>
-          <div class="search-order-form">
-            <input type="text" id="search-phone-number" placeholder="Nhập 5 số cuối SĐT" pattern="\d{5}" maxlength="5" title="Vui lòng nhập 5 chữ số.">
-            <button id="search-order-btn">Tìm kiếm</button>
-          </div>
+      <div class="content-container">
+        <div class="sidebar" id="group-sidebar">
+          <button class="sidebar-close-btn">&times;</button>
+          <h3>Nhóm món</h3>
+          <div id="group-list"></div>
         </div>
-        <div id="order-list-container" style="display: none;">
-          <h2>Danh Sách Đơn Hàng</h2>
-          <div id="order-stats-header" class="order-stats-header">
-            <div class="order-stats-item">Tổng đơn: <strong id="total-orders-count">0</strong></div>
-            <div class="order-stats-item">Đã hoàn thành: <strong id="completed-orders-count">0</strong></div>
-            <div class="order-stats-item">Chưa hoàn thành: <strong id="incomplete-orders-count">0</strong></div>
-            <div class="order-stats-item">Tổng tiền: <strong id="total-revenue">0₫</strong></div>
-            <button id="delete-all-orders-btn" class="delete-all-orders-btn" style="display:none;">Xóa tất cả đơn hàng</button>
+        <div id="overlay" class="overlay"></div>
+        <div class="main">
+          <h2>Menu Trà Sữa</h2>
+          <div id="menu" class="grid"></div>
+          <div id="order-search-section" style="margin-top: 40px; width: 100%; max-width: 1200px;">
+            <h2 style="margin-bottom: 10px;">Tra cứu Đơn Hàng</h2>
+            <div class="search-order-form">
+              <input type="text" id="search-phone-number" placeholder="Nhập 5 số cuối SĐT" pattern="\d{5}" maxlength="5" title="Vui lòng nhập 5 chữ số.">
+              <button id="search-order-btn">Tìm kiếm</button>
+            </div>
           </div>
-          <div id="order-list">Không có đơn hàng nào.</div>
+          <div id="order-list-container" style="display: none;">
+            <h2>Danh Sách Đơn Hàng</h2>
+            <div id="order-stats-header" class="order-stats-header">
+              <div class="order-stats-item">Tổng đơn: <strong id="total-orders-count">0</strong></div>
+              <div class="order-stats-item">Đã hoàn thành: <strong id="completed-orders-count">0</strong></div>
+              <div class="order-stats-item">Chưa hoàn thành: <strong id="incomplete-orders-count">0</strong></div>
+              <div class="order-stats-item">Tổng tiền: <strong id="total-revenue">0₫</strong></div>
+              <button id="delete-all-orders-btn" class="delete-all-orders-btn" style="display:none;">Xóa tất cả đơn hàng</button>
+            </div>
+            <div id="order-list">Không có đơn hàng nào.</div>
+          </div>
         </div>
       </div>
     </div>
