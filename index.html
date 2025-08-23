@@ -1647,6 +1647,24 @@
     }).showToast();
   }
 
+<script>
+  // Function để hiển thị thông báo kiểu toast (như Messenger)
+  function showNewOrderToast(orderData) {
+    Toastify({
+      text: `Đơn hàng mới từ SĐT: ${orderData.phoneNumber} - Tổng tiền: ${orderData.totalAmount.toLocaleString('vi-VN')}₫`,
+      duration: 5000, // Thời gian hiển thị thông báo là 5 giây
+      close: true,
+      gravity: "bottom", // Vị trí hiển thị: 'top' hoặc 'bottom'
+      position: "right", // Vị trí ngang: 'left', 'center', 'right'
+      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+      stopOnFocus: true, // Dừng thời gian đếm ngược khi di chuột qua thông báo
+      onClick: function() {
+        // Hành động khi click vào thông báo (ví dụ: mở trang quản lý)
+        // window.location.href = 'your-order-management-page.html';
+      }
+    }).showToast();
+  }
+
   // Lắng nghe đơn hàng mới trong Firestore
   // Đặt đoạn mã này trong sự kiện khi người dùng đăng nhập thành công
   auth.onAuthStateChanged(user => {
@@ -1675,6 +1693,7 @@
   
 </body>
 </html>
+
 
 
 
