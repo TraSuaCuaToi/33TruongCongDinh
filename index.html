@@ -263,6 +263,7 @@
       padding-top: 60px;
     }
     .modal-content {
+      position: relative; 
       background-color: #fefefe;
       margin: 5% auto;
       padding: 20px;
@@ -346,14 +347,13 @@
       color: #e63946;
     }
 .close {
-  position: absolute;   /* THÊM */
-  top: -4px;            /* nâng X lên; muốn cao nữa giảm tiếp (vd: -6px) */
-  right: 8px;           /* dịch phải */
+  position: absolute;   /* thêm */
+  top: 0;               /* chỉnh âm nếu muốn cao hơn: -4px, -6px */
+  right: 8px;
   color: #aaa;
   font-size: 28px;
   font-weight: bold;
   cursor: pointer;
-  /* BỎ dòng float:right; */
 }
     .close:hover,
     .close:focus {
@@ -1693,6 +1693,7 @@ initialSnapshot = false;
 
 </body>
 </html>
+
 
 
 
