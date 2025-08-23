@@ -593,6 +593,13 @@
         border: 1px solid #ccc;
         border-radius: 4px;
     }
+/* Toast */
+.toast-container{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:4000}
+.toast{min-width:260px;max-width:90vw;background:#111;color:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.25);padding:12px 14px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast .t-title{font-weight:700;margin-bottom:4px}
+.toast .t-close{position:absolute;top:6px;right:8px;border:0;background:transparent;color:#bbb;font-size:18px;cursor:pointer}
+
   </style>
 </head>
 <body>
@@ -886,6 +893,40 @@
     const completedOrdersCountEl = document.getElementById('completed-orders-count');
     const incompleteOrdersCountEl = document.getElementById('incomplete-orders-count');
     const totalRevenueEl = document.getElementById('total-revenue');
+const totalRevenueEl = document.getElementById('total-revenue');
+
+// ==== Toast + âm thanh ====
+const toastContainer = document.getElementById('toast-container') || (() => {
+  const c = document.createElement('div');
+  c.id = 'toast-container';
+  c.className = 'toast-container';
+  document.body.appendChild(c);
+  return c;
+})();
+
+function showToast(title, message){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `
+    <button class="t-close" aria-label="Đóng">&times;</button>
+    <div class="t-title">${title}</div>
+    <div class="t-body">${message}</div>
+  `;
+  toastContainer.appendChild(t);
+  requestAnimationFrame(()=> t.classList.add('show'));
+
+  const close = ()=>{ t.classList.remove('show'); setTimeout(()=> t.remove(), 200); };
+  t.querySelector('.t-close').onclick = close;
+  setTimeout(close, 5000);
+
+  if (navigator.vibrate) navigator.vibrate(80);
+
+  try { new Audio('notify.mp3').play().catch(()=>{}); } catch(e){}
+}
+
+
+
+    
     const deleteAllOrdersBtn = document.getElementById('delete-all-orders-btn');
     const searchPhoneInput = document.getElementById('search-phone-number');
     const searchOrderBtn = document.getElementById('search-order-btn');
@@ -1493,6 +1534,7 @@
     });
 
     let unsubscribe;
+    let initialSnapshot = true;
     function listenForOrders(collection) {
         if (typeof unsubscribe !== 'undefined') {
             unsubscribe();
@@ -1577,6 +1619,22 @@
             document.querySelectorAll('.complete-btn').forEach(btn => {
                 btn.addEventListener('click', toggleOrderCompleted);
             });
+// Thông báo khi có document mới (không báo lần đầu)
+const added = snapshot.docChanges().filter(c => c.type === 'added');
+if (!initialSnapshot && added.length) {
+  added.forEach(ch => {
+    const o = ch.doc.data();
+    const total = (o.items || []).reduce((s, it) => s + it.price * it.quantity, 0);
+    const when = o.timestamp ? o.timestamp.toDate().toLocaleTimeString('vi-VN') : '';
+    showToast(
+      `Đơn mới: ${o.phoneNumber || ''}`,
+      `Tổng: ${total.toLocaleString('vi-VN')}₫ • ${when}`
+    );
+  });
+}
+initialSnapshot = false;
+
+          
             
         }, err => {
             console.error('Lỗi khi lấy đơn hàng:', err);
@@ -1627,8 +1685,11 @@
         }
     });
   </script>
+  <div id="toast-container" class="toast-container"></div>
+
 </body>
 </html>
+
 
 
 
