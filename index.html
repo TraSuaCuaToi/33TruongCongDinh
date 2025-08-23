@@ -50,6 +50,11 @@
       background: #e63946;
       color: white;
     }
+    .user-email-header {
+      font-weight: bold;
+      color: #e63946;
+      margin-right: 15px;
+    }
     
     /* Store Info Section */
     .store-info-section {
@@ -466,12 +471,56 @@
         margin-right: 15px;
         margin-bottom: 10px;
     }
+
+    /* New CSS for improved login form layout */
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    /* Order statistics section */
+    .order-stats-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #fff8e1;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .order-stats-item {
+      text-align: center;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 1.1em;
+    }
+    .order-stats-item strong {
+      display: block;
+      font-size: 1.5em;
+    }
+    .delete-all-orders-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .delete-all-orders-btn:hover {
+      background-color: #d32f2f;
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
     <div class="header">
         <button id="menu-toggle-btn">Menu</button>
+        <span id="user-email-header" class="user-email-header"></span>
         <div>
           <button id="auth-button">Đăng nhập</button>
           <button id="cart-button">Giỏ Hàng (<span id="cart-count">0</span>)</button>
@@ -501,6 +550,13 @@
             
             <div id="order-list-container">
               <h2>Danh Sách Đơn Hàng</h2>
+              <div id="order-stats-header" class="order-stats-header">
+                <div class="order-stats-item">Tổng đơn: <strong id="total-orders-count">0</strong></div>
+                <div class="order-stats-item">Đã hoàn thành: <strong id="completed-orders-count">0</strong></div>
+                <div class="order-stats-item">Chưa hoàn thành: <strong id="incomplete-orders-count">0</strong></div>
+                <div class="order-stats-item">Tổng tiền: <strong id="total-revenue">0₫</strong></div>
+                <button id="delete-all-orders-btn" class="delete-all-orders-btn" style="display:none;">Xóa tất cả đơn hàng</button>
+              </div>
               <div id="order-list">Không có đơn hàng nào.</div>
             </div>
         </div>
@@ -661,20 +717,7 @@
           group: "Topping",
           options: [ { size: "", price: 7000 } ],
           desc: "Mô tả cái gì đó... về topping A..."
-        },
-        // Món 6: Topping
-        {
-          img: "Trà Hồng Đào 1.png",
-          name: "Trà Hồng Đào",
-          group: "Tea",
-          options: [
-            { size: "M", price: 25000 },
-            { size: "L", price: 27000 },
-            { size: "XL", price: 30000 },
-          ],
-          desc: "Mô tả cái gì đó... về topping A..."
         }
-      
       ];
 
     const IMAGE_BASE = "./";
@@ -699,6 +742,14 @@
     const sidebar = document.getElementById('group-sidebar');
     const overlay = document.getElementById('overlay');
     const sidebarCloseBtn = document.querySelector('.sidebar-close-btn');
+    const userEmailHeader = document.getElementById('user-email-header');
+    
+    // Statistics elements
+    const totalOrdersCountEl = document.getElementById('total-orders-count');
+    const completedOrdersCountEl = document.getElementById('completed-orders-count');
+    const incompleteOrdersCountEl = document.getElementById('incomplete-orders-count');
+    const totalRevenueEl = document.getElementById('total-revenue');
+    const deleteAllOrdersBtn = document.getElementById('delete-all-orders-btn');
 
     const groups = [...new Set(MENU.map(item => item.group))];
     
@@ -1202,11 +1253,17 @@
         userEmailDisplay.textContent = user.email;
         orderListContainer.style.display = 'block';
         
-        // Everyone who is logged in can see the order list
+        // Show user email in the header
+        userEmailHeader.textContent = user.email;
+        authButton.textContent = 'Quản lý tài khoản';
+        
+        // Show create user and delete button only for admin
         if (user.email === 'admin@myapp.com') {
           createUserBtnModal.style.display = 'block';
+          deleteAllOrdersBtn.style.display = 'block';
         } else {
           createUserBtnModal.style.display = 'none';
+          deleteAllOrdersBtn.style.display = 'none';
         }
         listenForOrders(ordersCollection);
 
@@ -1215,6 +1272,10 @@
         loginForm.style.display = 'flex';
         userActionsDiv.style.display = 'none';
         orderListContainer.style.display = 'none';
+        
+        // Reset header display
+        userEmailHeader.textContent = '';
+        authButton.textContent = 'Đăng nhập';
         
         if (typeof unsubscribe !== 'undefined') {
           unsubscribe();
@@ -1231,17 +1292,39 @@
         unsubscribe = collection.orderBy("timestamp", "desc").onSnapshot(snapshot => {
             if (snapshot.empty) {
                 orderList.innerHTML = 'Không có đơn hàng nào.';
+                totalOrdersCountEl.textContent = '0';
+                completedOrdersCountEl.textContent = '0';
+                incompleteOrdersCountEl.textContent = '0';
+                totalRevenueEl.textContent = '0₫';
                 return;
             }
+
+            let totalOrders = 0;
+            let completedOrders = 0;
+            let totalRevenue = 0;
+            
             orderList.innerHTML = '';
             snapshot.forEach(doc => {
                 const orderData = doc.data();
+                
+                // Count and calculate stats
+                totalOrders++;
+                if (orderData.completed) {
+                    completedOrders++;
+                }
+                
+                let orderTotalPrice = 0;
+                orderData.items.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    orderTotalPrice += itemTotal;
+                });
+                totalRevenue += orderTotalPrice;
+                
                 const orderCard = document.createElement('div');
                 orderCard.className = `order-card ${orderData.completed ? 'completed' : ''}`;
                 orderCard.dataset.id = doc.id;
                 
                 let itemsHTML = '';
-                let totalPrice = 0;
                 orderData.items.forEach(item => {
                     const itemToppingsHtml = item.toppings && item.toppings.length > 0 
                         ? `<p style="margin: 0; font-size: 0.9em; color: #888;">Topping: ${item.toppings.map(t => t.name).join(', ')}</p>`
@@ -1251,7 +1334,6 @@
                         : '';
 
                     const itemTotal = item.price * item.quantity;
-                    totalPrice += itemTotal;
                     itemsHTML += `
                         <div class="order-item-detail">
                             ${item.quantity} x ${item.name} (${item.size ? `Size: ${item.size}` : 'Không size'})
@@ -1269,13 +1351,19 @@
                 orderCard.innerHTML = `
                     <h4>Đơn hàng của khách ${orderData.phoneNumber}</h4>
                     <div>${itemsHTML}</div>
-                    <div style="font-weight: bold; margin-top: 10px;">Tổng cộng: ${totalPrice.toLocaleString('vi-VN')}₫</div>
+                    <div style="font-weight: bold; margin-top: 10px;">Tổng cộng: ${orderTotalPrice.toLocaleString('vi-VN')}₫</div>
                     ${orderData.notes ? `<div>Ghi chú chung: ${orderData.notes}</div>` : ''}
                     <div class="order-meta">Thời gian: ${timestamp}</div>
                     <button class="complete-btn">${orderData.completed ? 'Đã hoàn thành' : 'Đánh dấu đã xong'}</button>
                 `;
                 orderList.appendChild(orderCard);
             });
+            
+            // Update statistics display
+            totalOrdersCountEl.textContent = totalOrders;
+            completedOrdersCountEl.textContent = completedOrders;
+            incompleteOrdersCountEl.textContent = totalOrders - completedOrders;
+            totalRevenueEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
             
             document.querySelectorAll('.complete-btn').forEach(btn => {
                 btn.addEventListener('click', toggleOrderCompleted);
@@ -1304,8 +1392,31 @@
         showCustomAlert("Có lỗi xảy ra khi cập nhật trạng thái.");
       }
     }
+
+    // Delete all orders
+    deleteAllOrdersBtn.addEventListener('click', async () => {
+        const confirmDelete = confirm("Bạn có chắc chắn muốn xóa tất cả đơn hàng? Hành động này không thể hoàn tác.");
+        if (confirmDelete) {
+            try {
+                const snapshot = await ordersCollection.get();
+                if (snapshot.empty) {
+                    showCustomAlert("Không có đơn hàng nào để xóa.");
+                    return;
+                }
+                
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                showCustomAlert("Đã xóa tất cả đơn hàng thành công!");
+            } catch (error) {
+                console.error("Lỗi khi xóa đơn hàng: ", error);
+                showCustomAlert("Lỗi khi xóa đơn hàng. Vui lòng thử lại.");
+            }
+        }
+    });
   </script>
 </body>
 </html>
-
-
