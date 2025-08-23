@@ -345,14 +345,15 @@
       margin-top: 10px;
       color: #e63946;
     }
- .close {
-  position: absolute;
-  top: 0px;     /* chỉnh nhỏ hơn hoặc âm để X cao lên */
-  right: 8px;   /* dịch sang phải */
+.close {
+  position: absolute;   /* THÊM */
+  top: -4px;            /* nâng X lên; muốn cao nữa giảm tiếp (vd: -6px) */
+  right: 8px;           /* dịch phải */
   color: #aaa;
   font-size: 28px;
   font-weight: bold;
   cursor: pointer;
+  /* BỎ dòng float:right; */
 }
     .close:hover,
     .close:focus {
@@ -1692,6 +1693,7 @@ initialSnapshot = false;
 
 </body>
 </html>
+
 
 
 
