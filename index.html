@@ -6,8 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <style>
     /* Basic CSS Reset and Font */
     body {
@@ -1629,72 +1627,8 @@
         }
     });
   </script>
-<script>
-  // Function để hiển thị thông báo kiểu toast (như Messenger)
-  function showNewOrderToast(orderData) {
-    Toastify({
-      text: `Đơn hàng mới từ SĐT: ${orderData.phoneNumber} - Tổng tiền: ${orderData.totalAmount.toLocaleString('vi-VN')}₫`,
-      duration: 5000, // Thời gian hiển thị thông báo là 5 giây
-      close: true,
-      gravity: "bottom", // Vị trí hiển thị: 'top' hoặc 'bottom'
-      position: "right", // Vị trí ngang: 'left', 'center', 'right'
-      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
-      stopOnFocus: true, // Dừng thời gian đếm ngược khi di chuột qua thông báo
-      onClick: function() {
-        // Hành động khi click vào thông báo (ví dụ: mở trang quản lý)
-        // window.location.href = 'your-order-management-page.html';
-      }
-    }).showToast();
-  }
-
-<script>
-  // Function để hiển thị thông báo kiểu toast (như Messenger)
-  function showNewOrderToast(orderData) {
-    Toastify({
-      text: `Đơn hàng mới từ SĐT: ${orderData.phoneNumber} - Tổng tiền: ${orderData.totalAmount.toLocaleString('vi-VN')}₫`,
-      duration: 5000, // Thời gian hiển thị thông báo là 5 giây
-      close: true,
-      gravity: "bottom", // Vị trí hiển thị: 'top' hoặc 'bottom'
-      position: "right", // Vị trí ngang: 'left', 'center', 'right'
-      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
-      stopOnFocus: true, // Dừng thời gian đếm ngược khi di chuột qua thông báo
-      onClick: function() {
-        // Hành động khi click vào thông báo (ví dụ: mở trang quản lý)
-        // window.location.href = 'your-order-management-page.html';
-      }
-    }).showToast();
-  }
-
-  // Lắng nghe đơn hàng mới trong Firestore
-  // Đặt đoạn mã này trong sự kiện khi người dùng đăng nhập thành công
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      console.log("Người dùng đã đăng nhập. Bắt đầu lắng nghe đơn hàng mới.");
-
-      const ordersCollection = db.collection("orders");
-      ordersCollection.orderBy("timestamp", "desc").onSnapshot(snapshot => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added") {
-            const newOrder = change.doc.data();
-            console.log("Đơn hàng mới được thêm vào: ", newOrder);
-            
-            // Lọc đơn hàng mới được thêm vào trong vòng 10 giây gần nhất
-            const orderTimestamp = newOrder.timestamp.toMillis();
-            const now = Date.now();
-            if (now - orderTimestamp < 10000) { 
-              showNewOrderToast(newOrder);
-            }
-          }
-        });
-      });
-    }
-  });
-</script>
-  
 </body>
 </html>
-
-
 
 
 
