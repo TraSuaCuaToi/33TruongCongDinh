@@ -1311,6 +1311,13 @@
                 });
             }
             searchResultModal.style.display = 'block';
+      // Nếu đã đăng nhập thì cuộn đến Danh Sách Đơn Hàng
+          if (auth.currentUser) {
+            document.getElementById('order-list-container')
+            .scrollIntoView({ behavior: 'smooth' });
+            }
+
+          
         } catch (error) {
             console.error("Lỗi khi tìm kiếm đơn hàng: ", error);
             showCustomAlert('Lỗi khi tìm kiếm. Vui lòng thử lại.');
@@ -1622,4 +1629,5 @@
   </script>
 </body>
 </html>
+
 
