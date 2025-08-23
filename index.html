@@ -549,6 +549,44 @@
     .delete-all-orders-btn:hover {
       background-color: #d32f2f;
     }
+
+    /* NEW CSS for search order form */
+    .search-order-form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .search-order-form input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 150px;
+    }
+    .search-order-form button {
+      padding: 8px 12px;
+      background-color: #55acee;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .search-order-form button:hover {
+      background-color: #419cd8;
+    }
+
+    /* NEW CSS for small login form */
+    .compact-login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .compact-login-form input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -583,7 +621,15 @@
             <h2>Menu Trà Sữa</h2>
             <div id="menu" class="grid"></div>
             
-            <div id="order-list-container">
+            <div id="order-search-section" style="margin-top: 40px; width: 100%; max-width: 1200px;">
+                <h2 style="margin-bottom: 10px;">Tra cứu Đơn Hàng</h2>
+                <div class="search-order-form">
+                    <input type="text" id="search-phone-number" placeholder="Nhập 5 số cuối SĐT" pattern="\d{5}" maxlength="5" title="Vui lòng nhập 5 chữ số.">
+                    <button id="search-order-btn">Tìm kiếm</button>
+                </div>
+            </div>
+
+            <div id="order-list-container" style="display: none;">
               <h2>Danh Sách Đơn Hàng</h2>
               <div id="order-stats-header" class="order-stats-header">
                 <div class="order-stats-item">Tổng đơn: <strong id="total-orders-count">0</strong></div>
@@ -599,11 +645,11 @@
   </div>
 
   <div id="authModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 350px;">
       <span class="close" data-modal="authModal">&times;</span>
       <div id="auth-section">
         <div id="auth-status">Bạn chưa đăng nhập.</div>
-        <form id="login-form" class="auth-form">
+        <form id="login-form" class="auth-form compact-login-form">
           <h3>Đăng nhập</h3>
           <input type="email" id="login-email" placeholder="Email" required>
           <input type="password" id="login-password" placeholder="Mật khẩu" required>
@@ -684,6 +730,14 @@
     <div class="modal-content">
       <p id="customAlertMessage">...</p>
       <button onclick="document.getElementById('customAlertModal').style.display='none'">OK</button>
+    </div>
+  </div>
+
+  <div id="searchResultModal" class="modal">
+    <div class="modal-content">
+      <span class="close" data-modal="searchResultModal">&times;</span>
+      <h3>Kết Quả Tìm Kiếm Đơn Hàng</h3>
+      <div id="search-results-list"></div>
     </div>
   </div>
 
@@ -827,6 +881,10 @@
     const incompleteOrdersCountEl = document.getElementById('incomplete-orders-count');
     const totalRevenueEl = document.getElementById('total-revenue');
     const deleteAllOrdersBtn = document.getElementById('delete-all-orders-btn');
+    const searchPhoneInput = document.getElementById('search-phone-number');
+    const searchOrderBtn = document.getElementById('search-order-btn');
+    const searchResultModal = document.getElementById('searchResultModal');
+    const searchResultsList = document.getElementById('search-results-list');
 
     const groups = [...new Set(MENU.map(item => item.group))];
     
@@ -943,7 +1001,7 @@
     const notesInput = document.getElementById('notes');
     const submitOrderCartBtn = document.getElementById('submit-order-cart');
     const closeButtons = document.querySelectorAll('.modal .close');
-
+    
     // Open login modal
     authButton.addEventListener('click', () => authModal.style.display = 'block');
     
@@ -1191,6 +1249,68 @@
       }
     });
 
+    // Handle search order
+    searchOrderBtn.addEventListener('click', async () => {
+        const phoneNumber = searchPhoneInput.value.trim();
+        if (phoneNumber.length !== 5) {
+            showCustomAlert('Vui lòng nhập đủ 5 số cuối của số điện thoại.');
+            return;
+        }
+
+        try {
+            const querySnapshot = await ordersCollection.where('phoneNumber', '==', phoneNumber).get();
+            searchResultsList.innerHTML = '';
+            
+            if (querySnapshot.empty) {
+                searchResultsList.innerHTML = '<p>Không tìm thấy đơn hàng nào với số điện thoại này.</p>';
+            } else {
+                querySnapshot.forEach(doc => {
+                    const orderData = doc.data();
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'order-card';
+                    orderDiv.style.backgroundColor = orderData.completed ? '#f0f0f0' : '#ffe4e9';
+                    
+                    const statusText = orderData.completed ? 'ĐÃ HOÀN THÀNH' : 'CHƯA HOÀN THÀNH';
+                    
+                    let itemsHTML = '';
+                    let orderTotalPrice = 0;
+                    orderData.items.forEach(item => {
+                        const itemToppingsHtml = item.toppings && item.toppings.length > 0
+                            ? `<p style="margin: 0; font-size: 0.9em; color: #888;">Topping: ${item.toppings.map(t => t.name).join(', ')}</p>`
+                            : '';
+                        const itemNotesHtml = item.notes
+                            ? `<p style="margin: 0; font-size: 0.9em; color: #888;">Ghi chú: ${item.notes}</p>`
+                            : '';
+                        const itemTotal = item.price * item.quantity;
+                        orderTotalPrice += itemTotal;
+                        itemsHTML += `
+                            <div class="order-item-detail">
+                                ${item.quantity} x ${item.name} (${item.size ? `Size: ${item.size}` : 'Không size'})
+                                <span style="font-weight: bold; color: #e63946;">
+                                    ${itemTotal.toLocaleString('vi-VN')}₫
+                                </span>
+                                ${itemToppingsHtml}
+                                ${itemNotesHtml}
+                            </div>
+                        `;
+                    });
+
+                    orderDiv.innerHTML = `
+                        <h4>Đơn hàng của khách ${orderData.phoneNumber}</h4>
+                        <div>${itemsHTML}</div>
+                        <div style="font-weight: bold; margin-top: 10px;">Tổng cộng: ${orderTotalPrice.toLocaleString('vi-VN')}₫</div>
+                        <p style="font-weight: bold; color: ${orderData.completed ? '#4CAF50' : '#e63946'}; font-size: 1.1em; margin-top: 10px;">Trạng thái: ${statusText}</p>
+                    `;
+                    searchResultsList.appendChild(orderDiv);
+                });
+            }
+            searchResultModal.style.display = 'block';
+        } catch (error) {
+            console.error("Lỗi khi tìm kiếm đơn hàng: ", error);
+            showCustomAlert('Lỗi khi tìm kiếm. Vui lòng thử lại.');
+        }
+    });
+
     // Close modals
     closeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1347,7 +1467,7 @@
         authStatus.textContent = 'Bạn chưa đăng nhập.';
         loginForm.style.display = 'flex';
         userActionsDiv.style.display = 'none';
-        orderListContainer.style.display = 'none';
+        orderListContainer.style.display = 'none'; // Hide order list for non-logged-in users
         
         // Reset header display
         userEmailHeader.textContent = '';
