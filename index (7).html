@@ -1647,6 +1647,7 @@ if (manageMenuBtn) {
   manageMenuBtn.style.display = (user.email === 'admin@myapp.com') ? 'inline-block' : 'none';
 }
         listenForOrders(ordersCollection);
+		subscribeMenu();
 
       } else {
         authStatus.textContent = 'Bạn chưa đăng nhập.';
@@ -1821,6 +1822,7 @@ initialSnapshot = false;
 
 </body>
 </html>
+
 
 
 
