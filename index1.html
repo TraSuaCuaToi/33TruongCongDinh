@@ -510,20 +510,7 @@
       border-top: 1px dashed #ccc;
       padding-top: 10px;
     }
-    .complete-btn {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      margin-top: 10px;
-    }
-    .complete-btn:hover {
-      background-color: #45a049;
-    }
-    
+
     /* Order statistics section */
     .order-stats-header {
       display: flex;
@@ -649,6 +636,26 @@
   overflow-y: auto;  
   padding-right: 4px;
 }
+.accept-btn,
+.complete-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 140px !important;
+  height: 40px !important;
+  padding: 0 !important; /* bỏ padding thừa */
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  background: #28a745; 
+}
+.accept-btn[disabled],
+.complete-btn[disabled] {
+  background: #6c757d;   /* xám */
+  color: #fff;
+  cursor: default;
+}
+
 
 
 /* Toast */
@@ -798,7 +805,7 @@
       </div>
       <div>
         <label for="phone-number">5 số cuối SĐT của bạn:</label>
-        <input type="text" id="phone-number" placeholder="Ví dụ: 12345" required pattern="\d{5}" maxlength="5" title="Vui lòng nhập 5 chữ số cuối.">
+        <input type="text" id="phone-number" placeholder="" required pattern="\d{5}" maxlength="5" title="Vui lòng nhập 5 chữ số cuối.">
         <label for="notes">Ghi chú chung cho đơn hàng:</label>
         <textarea id="notes" placeholder="Ví dụ: Giao hàng vào buổi chiều..."></textarea>
       </div>
@@ -829,7 +836,7 @@
     <h4 id="menu-form-title">Thêm món mới</h4>
     <div class="config-options">
       <div class="option-group"><label>Tên món</label><input type="text" id="mf-name"></div>
-      <div class="option-group"><label>Nhóm</label><input type="text" id="mf-group"></div>
+      <div class="option-group"><label>Nhóm(Riêng Topping phải khi đúng là Topping)</label><input type="text" id="mf-group"></div>
       <div class="option-group"><label>Ảnh(Nhập đúng tên ảnh VD: Trà sữa 1.png)</label><input type="text" id="mf-img"></div>
       <div class="option-group"><label>Mô tả</label><textarea id="mf-desc"></textarea></div>
       <div class="option-group">
@@ -1469,7 +1476,7 @@ toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
                     orderDiv.style.backgroundColor = orderData.completed ? '#f0f0f0' : '#ffe4e9';
                     
                     const statusText = orderData.completed ? 'ĐÃ HOÀN THÀNH' : 'CHƯA HOÀN THÀNH';
-                    
+                 
                     let itemsHTML = '';
                     let orderTotalPrice = 0;
                     orderData.items.forEach(item => {
@@ -1499,6 +1506,28 @@ toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
                         <div style="font-weight: bold; margin-top: 10px;">Tổng cộng: ${orderTotalPrice.toLocaleString('vi-VN')}₫</div>
                         <p style="font-weight: bold; color: ${orderData.completed ? '#4CAF50' : '#e63946'}; font-size: 1.1em; margin-top: 10px;">Trạng thái: ${statusText}</p>
                     `;
+// >>> THÊM Ở ĐÂY <<<
+if (!orderData.accepted && !orderData.completed) {
+  const cancelBtn = document.createElement('button');
+  cancelBtn.id = 'cancel-order-btn';
+  cancelBtn.className = 'btn btn-danger';
+  cancelBtn.textContent = 'Hủy đơn';
+  cancelBtn.style.marginTop = '10px';
+
+  cancelBtn.addEventListener('click', async () => {
+    try {
+      await ordersCollection.doc(doc.id).delete();
+      showCustomAlert('Đã hủy đơn.');
+      searchResultModal.style.display = 'none';
+    } catch (e) {
+      console.error(e);
+      showCustomAlert('Hủy đơn thất bại. Vui lòng thử lại.');
+    }
+  });
+
+  orderDiv.appendChild(cancelBtn);
+}
+
                     searchResultsList.appendChild(orderDiv);
                 });
             }
@@ -1755,14 +1784,27 @@ if (manageMenuBtn) manageMenuBtn.style.display = 'none';
                 
                 const timestamp = orderData.timestamp ? orderData.timestamp.toDate().toLocaleString('vi-VN') : 'Đang cập nhật...';
 
-                orderCard.innerHTML = `
-                    <h4>Đơn hàng của khách ${orderData.phoneNumber}</h4>
-                    <div>${itemsHTML}</div>
-                    <div style="font-weight: bold; margin-top: 10px;">Tổng cộng: ${orderTotalPrice.toLocaleString('vi-VN')}₫</div>
-                    ${orderData.notes ? `<div>Ghi chú chung: ${orderData.notes}</div>` : ''}
-                    <div class="order-meta">Thời gian: ${timestamp}</div>
-                    <button class="complete-btn">${orderData.completed ? 'Đã hoàn thành' : 'Đánh dấu đã xong'}</button>
-                `;
+               orderCard.innerHTML = `
+  <h4>Đơn hàng của khách ${orderData.phoneNumber}</h4>
+  <div>${itemsHTML}</div>
+  <div style="font-weight: bold; margin-top: 10px;">
+    Tổng cộng: ${orderTotalPrice.toLocaleString('vi-VN')}₫
+  </div>
+  ${orderData.notes ? `<div>Ghi chú chung: ${orderData.notes}</div>` : ''}
+  <div class="order-meta">Thời gian: ${timestamp}</div>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+    <button class="accept-btn" ${orderData.accepted ? 'disabled' : ''}>
+      ${orderData.accepted ? 'ĐÃ NHẬN ĐƠN' : 'Nhận đơn'}
+    </button>
+    <button class="complete-btn" ${orderData.completed ? 'disabled' : ''}>
+      ${orderData.completed ? 'Đã hoàn thành' : 'Đánh dấu đã xong'}
+    </button>
+  </div>
+`;
+
+             
+
                 orderList.appendChild(orderCard);
             });
             
@@ -1775,6 +1817,10 @@ if (manageMenuBtn) manageMenuBtn.style.display = 'none';
             document.querySelectorAll('.complete-btn').forEach(btn => {
                 btn.addEventListener('click', toggleOrderCompleted);
             });
+document.querySelectorAll('.accept-btn').forEach(btn => {
+  btn.addEventListener('click', acceptOrder);
+});
+
 // Thông báo khi có document mới (không báo lần đầu)
 const added = snapshot.docChanges().filter(c => c.type === 'added');
 if (!initialSnapshot && added.length) {
@@ -1815,6 +1861,36 @@ initialSnapshot = false;
         showCustomAlert("Có lỗi xảy ra khi cập nhật trạng thái.");
       }
     }
+async function acceptOrder(e) {
+  const orderCard = e.target.closest('.order-card');
+  const orderId = orderCard.dataset.id;
+  const docRef = ordersCollection.doc(orderId);
+
+  try {
+    const snap = await docRef.get();
+    if (snap.exists) {
+      const data = snap.data();
+      // Nếu đã hoàn thành thì không cần nhận nữa
+      if (data.completed) {
+        showCustomAlert('Đơn đã hoàn thành.');
+        return;
+      }
+      // Nếu đã nhận rồi thì bỏ qua
+      if (data.accepted) {
+        showCustomAlert('Đơn này đã được nhận.');
+        return;
+      }
+      await docRef.update({
+        accepted: true,
+        acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showCustomAlert('Đã nhận đơn!');
+    }
+  } catch (err) {
+    console.error(err);
+    showCustomAlert('Lỗi khi nhận đơn. Vui lòng thử lại.');
+  }
+}
 
     // Delete all orders
     deleteAllOrdersBtn.addEventListener('click', async () => {
@@ -1876,12 +1952,14 @@ function subscribeMenu() {
     console.error("Lỗi khi đọc menu:", err);
   });
 }
+
+
+
 </script>
 
 <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
-
 
 
 
