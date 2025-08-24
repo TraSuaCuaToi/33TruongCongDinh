@@ -627,8 +627,30 @@
   cursor: pointer;
   padding: 0 10px;
 }
+/* Responsive modal Quản lý Menu */
+#manageMenuModal .modal-content {
+  width: 30% !important;       /* trên PC: chiếm 30% màn hình */
+  max-width: 30% !important;
+  max-height: 85vh;
+  overflow-y: auto;
+  margin: 40px auto !important;
+}
 
+@media (max-width: 600px) {
+  #manageMenuModal .modal-content {
+    width: 90% !important;     /* trên mobile: chiếm 90% màn hình */
+    max-width: 90% !important;
+  }
+}
 
+/* Scroll riêng cho danh sách món (không kéo cả modal) */
+#menu-admin-list{
+  height: 200px;     /* cố định ~200px (xuất hiện thanh cuộn sớm) */
+  overflow-y: auto;  
+  padding-right: 4px;
+}
+
+/////////////////////////////////////////////////////////
 /* Toast */
 .toast-container{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:4000}
 .toast{min-width:260px;max-width:90vw;background:#111;color:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.25);padding:12px 14px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s}
@@ -808,7 +830,7 @@
     <div class="config-options">
       <div class="option-group"><label>Tên món</label><input type="text" id="mf-name"></div>
       <div class="option-group"><label>Nhóm</label><input type="text" id="mf-group"></div>
-      <div class="option-group"><label>Ảnh (chỉ tên file)</label><input type="text" id="mf-img"></div>
+      <div class="option-group"><label>Ảnh(Nhập đúng tên ảnh VD: Trà sữa 1.png)</label><input type="text" id="mf-img"></div>
       <div class="option-group"><label>Mô tả</label><textarea id="mf-desc"></textarea></div>
       <div class="option-group">
         <label>Size & Giá</label>
@@ -1188,6 +1210,7 @@ async function deleteMenuItem(id, name) {
   try {
     await menuCollection.doc(id).delete();
     showCustomAlert('Đã xóa món.');
+    renderAdminMenuList();
   } catch (e) {
     console.error(e);
     showCustomAlert('Xóa món thất bại.');
