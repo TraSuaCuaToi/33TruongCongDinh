@@ -603,6 +603,13 @@
 .toast.show{opacity:1;transform:translateY(0)}
 .toast .t-title{font-weight:700;margin-bottom:4px}
 .toast .t-close{position:absolute;top:6px;right:8px;border:0;background:transparent;color:#bbb;font-size:18px;cursor:pointer}
+/* ---Ẩn/hiện topping list--- */
+#topping-options.collapsed #topping-checkboxes { display: none; }
+#toggle-toppings {
+  width: 100%; text-align:left; border:1px dashed #e5e7eb;
+  background:#fff; padding:8px; border-radius:6px; cursor:pointer;
+  font-size:14px; color:#e63946;
+}
 
   </style>
 </head>
@@ -713,7 +720,7 @@
               <div id="size-radio-buttons"></div>
           </div>
           <div id="topping-options" class="option-group">
-              <h4>Chọn topping:</h4>
+              <h4>Bạn muốn thêm topping không:</h4>
               <div id="topping-checkboxes" class="topping-checkbox-container"></div>
           </div>
           <div class="option-group">
@@ -764,109 +771,412 @@
 
   <script>
     const MENU = [
-        // Món 1: Trà sữa
-        {
-          img: "Trà sữa 1.png",
-          name: "Trà Sữa Dâu",
-          group: "Trà Sữa",
-          options: [
-            { size: "M", price: 10000 },
-            { size: "L", price: 12000 },
-            { size: "XL", price: 15000 },
-          ],
-          desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
-        },
-        // Món 2: Matcha
-        {
-          img: "Trà sữa 2.png",
-          name: "Matcha latte",
-          group: "Trà Sữa",
-          options: [
-            { size: "M", price: 29000 },
-            { size: "L", price: 30000 },
-            { size: "XL", price: 32000 },
-          ],
-          desc: "Matcha Nhật Bản thanh mát. Kết hợp sữa tươi béo nhẹ, thơm dịu."
-        },
-        // Món 3: Topping
-        {
-          img: "Topping 1.png",
-          name: "Topping Dừa",
-          group: "Topping",
-          options: [ { size: "", price: 7000 } ],
-          desc: "Ngon giòn béo nhẹ."
-        },
-        // Món 4: Topping
-        {
-          img: "Topping 2.png",
-          name: "Topping Nha Đam",
-          group: "Topping",
-          options: [ { size: "", price: 5000 } ],
-          desc: "Mát lạnh, giòn sần sật."
-        },
-        // Món 5: Trà sữa
-        {
-          img: "Trà sữa 3.png",
-          name: "Sô-cô-la sữa",
-          group: "Trà Sữa",
-          options: [
-            { size: "M", price: 25000 },
-            { size: "L", price: 27000 },
-            { size: "XL", price: 30000 },
-          ],
-          desc: "Sô-cô-la ngọt ngào, hòa quyện cùng sữa tươi."
-        },
-        // Món 6: Topping
-        {
-          img: "Topping 3.png",
-          name: "Topping A",
-          group: "Topping",
-          options: [ { size: "", price: 7000 } ],
-          desc: "Mô tả cái gì đó... về topping A..."
-        },
-        {
-          img: "Topping 4.png",
-          name: "Thạch rau câu",
-          group: "Topping",
-          options: [ { size: "", price: 6000 } ],
-          desc: "Ngon giòn, dễ ăn."
-        },
-        {
-          img: "Topping 5.png",
-          name: "Thạch cà phê",
-          group: "Topping",
-          options: [ { size: "", price: 8000 } ],
-          desc: "Hương vị cà phê đậm đà."
-        },
-        {
-          img: "Topping 6.png",
-          name: "Kem phô mai",
-          group: "Topping",
-          options: [ { size: "", price: 10000 } ],
-          desc: "Béo ngậy, tan chảy."
-        },
-        {
-          img: "Topping 7.png",
-          name: "Pudding trứng",
-          group: "Topping",
-          options: [ { size: "", price: 9000 } ],
-          desc: "Mềm mịn, béo bùi."
-        },
-        {
-          img: "Topping 8.png",
-          name: "Trân châu trắng",
-          group: "Topping",
-          options: [ { size: "", price: 7000 } ],
-          desc: "Dai giòn, trong suốt."
-        },
-        {
-          img: "Topping 9.png",
-          name: "Hạt sen",
-          group: "Topping",
-          options: [ { size: "", price: 8000 } ],
-          desc: "Bùi bùi, thơm ngon."
-        }
-      ];
+//////////////////////////////////////////////////////////////////
+
+  {
+    img: "Trà sữa 1.png",
+    name: "Trà Sữa Dâu",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 22000 },
+      { size: "L", price: 27000 },
+      { size: "XL", price: 32000 },
+    ],
+    desc: "Trà sữa dâu thơm ngọt, kết hợp trân châu đen.\nHương vị tươi mới, phù hợp giới trẻ."
+  },
+  {
+    img: "Trà sữa 2.png",
+    name: "Trà Sữa Socola",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 25000 },
+      { size: "L", price: 30000 },
+      { size: "XL", price: 34000 },
+    ],
+    desc: "Hương vị socola đậm đà hòa quyện cùng trà sữa.\nNgọt ngào và béo ngậy."
+  },
+  {
+    img: "Trà sữa 3.png",
+    name: "Trà Sữa Matcha",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 23000 },
+      { size: "L", price: 28000 },
+      { size: "XL", price: 33000 },
+    ],
+    desc: "Matcha thơm nhẹ, vị đăng đắng kết hợp sữa ngọt.\nThanh mát, giúp tỉnh táo."
+  },
+  {
+    img: "Trà sữa 4.png",
+    name: "Trà Sữa Truyền Thống",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 20000 },
+      { size: "L", price: 25000 },
+      { size: "XL", price: 30000 },
+    ],
+    desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
+  },
+  {
+    img: "Trà sữa 5.png",
+    name: "Trà Sữa Khoai Môn",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 24000 },
+      { size: "L", price: 29000 },
+      { size: "XL", price: 34000 },
+    ],
+    desc: "Khoai môn bùi béo kết hợp trà sữa thơm lừng.\nĐặc trưng và độc đáo."
+  },
+  {
+    img: "Trà sữa 6.png",
+    name: "Trà Sữa Thái Xanh",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 22000 },
+      { size: "L", price: 27000 },
+      { size: "XL", price: 32000 },
+    ],
+    desc: "Trà xanh Thái thơm mát hòa quyện cùng sữa.\nGiải nhiệt, dễ uống."
+  },
+  {
+    img: "Trà sữa 7.png",
+    name: "Trà Sữa Thái Đỏ",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 21000 },
+      { size: "L", price: 26000 },
+      { size: "XL", price: 31000 },
+    ],
+    desc: "Trà đỏ Thái vị đậm, màu sắc bắt mắt.\nPhù hợp người thích vị lạ."
+  },
+  {
+    img: "Trà sữa 8.png",
+    name: "Trà Sữa Oolong",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 25000 },
+      { size: "L", price: 30000 },
+      { size: "XL", price: 35000 },
+    ],
+    desc: "Trà Oolong thơm dịu, ít đắng.\nTốt cho sức khỏe và tinh thần."
+  },
+  {
+    img: "Trà sữa 9.png",
+    name: "Trà Sữa Caramel",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 23000 },
+      { size: "L", price: 28000 },
+      { size: "XL", price: 33000 },
+    ],
+    desc: "Caramel ngọt béo kết hợp cùng trà sữa.\nNgọt ngào, thơm lừng."
+  },
+  {
+    img: "Trà sữa 10.png",
+    name: "Trà Sữa Phô Mai",
+    group: "Trà Sữa",
+    options: [
+      { size: "M", price: 26000 },
+      { size: "L", price: 31000 },
+      { size: "XL", price: 35000 },
+    ],
+    desc: "Kem phô mai béo mặn hòa quyện trà sữa.\nLạ miệng và hấp dẫn."
+  },
+  {
+    img: "Tea 1.png",
+    name: "Trà Đào Cam Sả",
+    group: "Trà",
+    options: [
+      { size: "M", price: 22000 },
+      { size: "L", price: 27000 },
+      { size: "XL", price: 30000 },
+    ],
+    desc: "Trà đào ngọt thanh, kết hợp cam tươi và sả thơm.\nMát lạnh, giải khát cực tốt."
+  },
+  {
+    img: "Tea 2.png",
+    name: "Trà Chanh Tươi",
+    group: "Trà",
+    options: [
+      { size: "M", price: 20000 },
+      { size: "L", price: 25000 },
+      { size: "XL", price: 28000 },
+    ],
+    desc: "Trà chanh truyền thống, vị chua ngọt hài hòa.\nThức uống quen thuộc, dễ uống."
+  },
+  {
+    img: "Tea 3.png",
+    name: "Trà Vải Hoa Hồng",
+    group: "Trà",
+    options: [
+      { size: "M", price: 24000 },
+      { size: "L", price: 28000 },
+      { size: "XL", price: 32000 },
+    ],
+    desc: "Sự kết hợp độc đáo giữa vải ngọt và hoa hồng thơm dịu.\nThích hợp cho người yêu vị ngọt thanh."
+  },
+  {
+    img: "Tea 4.png",
+    name: "Trà Tắc Mật Ong",
+    group: "Trà",
+    options: [
+      { size: "M", price: 21000 },
+      { size: "L", price: 26000 },
+      { size: "XL", price: 30000 },
+    ],
+    desc: "Trà tắc chua nhẹ hòa quyện cùng mật ong ngọt dịu.\nTăng đề kháng, tốt cho sức khỏe."
+  },
+  {
+    img: "Tea 5.png",
+    name: "Trà Dâu Tây",
+    group: "Trà",
+    options: [
+      { size: "M", price: 23000 },
+      { size: "L", price: 27000 },
+      { size: "XL", price: 31000 },
+    ],
+    desc: "Dâu tây tươi kết hợp cùng trà thanh mát.\nVị ngọt dịu, thơm ngon."
+  },
+  {
+    img: "Tea 6.png",
+    name: "Trà Táo Bạc Hà",
+    group: "Trà",
+    options: [
+      { size: "M", price: 25000 },
+      { size: "L", price: 29000 },
+      { size: "XL", price: 32000 },
+    ],
+    desc: "Táo tươi giòn ngọt hòa cùng vị mát lạnh bạc hà.\nThức uống sảng khoái."
+  },
+  {
+    img: "Tea 7.png",
+    name: "Trà Xoài Nhiệt Đới",
+    group: "Trà",
+    options: [
+      { size: "M", price: 22000 },
+      { size: "L", price: 26000 },
+      { size: "XL", price: 30000 },
+    ],
+    desc: "Trà xoài chua ngọt tự nhiên.\nHương vị nhiệt đới hấp dẫn."
+  },
+  {
+    img: "Tea 8.png",
+    name: "Trà Dứa Gừng",
+    group: "Trà",
+    options: [
+      { size: "M", price: 20000 },
+      { size: "L", price: 25000 },
+      { size: "XL", price: 28000 },
+    ],
+    desc: "Dứa chua ngọt hòa cùng gừng cay nồng.\nGiúp ấm bụng và tốt cho tiêu hóa."
+  },
+  {
+    img: "Tea 9.png",
+    name: "Trà Chanh Dây",
+    group: "Trà",
+    options: [
+      { size: "M", price: 23000 },
+      { size: "L", price: 27000 },
+      { size: "XL", price: 31000 },
+    ],
+    desc: "Chanh dây chua ngọt kết hợp trà xanh.\nGiàu vitamin C, tươi mát sảng khoái."
+  },
+  {
+    img: "Tea 10.png",
+    name: "Trà Hạt Sen",
+    group: "Trà",
+    options: [
+      { size: "M", price: 24000 },
+      { size: "L", price: 28000 },
+      { size: "XL", price: 32000 },
+    ],
+    desc: "Hạt sen bùi thơm kết hợp cùng trà thanh khiết.\nThanh tịnh, nhẹ nhàng."
+  },
+
+  {
+    img: "topping 1.png",
+    name: "Trân Châu Đen",
+    group: "Topping",
+    options: [{ size: "", price: 6000 }],
+    desc: "Trân châu đen dẻo thơm."
+  },
+  {
+    img: "topping 2.png",
+    name: "Trân Châu Trắng",
+    group: "Topping",
+    options: [{ size: "", price: 7000 }],
+    desc: "Hạt giòn dai, vị thanh."
+  },
+  {
+    img: "topping 3.png",
+    name: "Pudding Trứng",
+    group: "Topping",
+    options: [{ size: "", price: 9000 }],
+    desc: "Mềm mịn, béo nhẹ."
+  },
+  {
+    img: "topping 4.png",
+    name: "Pudding Socola",
+    group: "Topping",
+    options: [{ size: "", price: 10000 }],
+    desc: "Đậm vị socola."
+  },
+  {
+    img: "topping 5.png",
+    name: "Pudding Matcha",
+    group: "Topping",
+    options: [{ size: "", price: 10000 }],
+    desc: "Hậu vị matcha thanh."
+  },
+  {
+    img: "topping 6.png",
+    name: "Thạch Phô Mai",
+    group: "Topping",
+    options: [{ size: "", price: 9000 }],
+    desc: "Thạch dai, vị phô mai béo."
+  },
+  {
+    img: "topping 7.png",
+    name: "Thạch Trái Cây",
+    group: "Topping",
+    options: [{ size: "", price: 7000 }],
+    desc: "Nhiều hương trái cây."
+  },
+  {
+    img: "topping 8.png",
+    name: "Thạch Dừa",
+    group: "Topping",
+    options: [{ size: "", price: 6000 }],
+    desc: "Giòn nhẹ, mát miệng."
+  },
+  {
+    img: "topping 9.png",
+    name: "Thạch Cà Phê",
+    group: "Topping",
+    options: [{ size: "", price: 7000 }],
+    desc: "Hương cà phê nhẹ."
+  },
+  {
+    img: "topping 10.png",
+    name: "Nha Đam",
+    group: "Topping",
+    options: [{ size: "", price: 7000 }],
+    desc: "Miếng nha đam mát."
+  },
+  {
+    img: "topping 11.png",
+    name: "Hạt Thủy Tinh Chanh Dây",
+    group: "Topping",
+    options: [{ size: "", price: 9000 }],
+    desc: "Nổ vui miệng, chua ngọt."
+  },
+  {
+    img: "topping 12.png",
+    name: "Kem Cheese",
+    group: "Topping",
+    options: [{ size: "", price: 10000 }],
+    desc: "Lớp kem mặn ngọt béo."
+  },
+  {
+    img: "topping 13.png",
+    name: "Flan Caramel",
+    group: "Topping",
+    options: [{ size: "", price: 10000 }],
+    desc: "Ngậy thơm caramel."
+  },
+  {
+    img: "topping 14.png",
+    name: "Hạt Sen",
+    group: "Topping",
+    options: [{ size: "", price: 9000 }],
+    desc: "Bùi, thơm nhẹ."
+  },
+  {
+    img: "topping 15.png",
+    name: "Đậu Đỏ",
+    group: "Topping",
+    options: [{ size: "", price: 8000 }],
+    desc: "Bé o bùi, ngọt vừa."
+  },
+  {
+    img: "bánh 1.png",
+    name: "Bánh Bông Lan Trứng Muối",
+    group: "Bánh",
+    options: [
+      { size: "S", price: 15000 },
+      { size: "M", price: 20000 },
+    ],
+    desc: "Bánh mềm xốp, trứng muối béo mặn, sốt bơ thơm ngậy."
+  },
+  {
+    img: "bánh 2.png",
+    name: "Bánh Mousse Socola",
+    group: "Bánh",
+    options: [
+      { size: "S", price: 17000 },
+      { size: "M", price: 22000 },
+    ],
+    desc: "Mousse socola ngọt đậm, tan ngay khi ăn."
+  },
+  {
+    img: "bánh 3.png",
+    name: "Bánh Flan",
+    group: "Bánh",
+    options: [
+      { size: "S", price: 15000 },
+      { size: "M", price: 20000 },
+    ],
+    desc: "Bánh flan caramel mềm mịn, ngọt béo vừa đủ."
+  },
+  {
+    img: "bánh 4.png",
+    name: "Bánh Mì Bơ Tỏi",
+    group: "Bánh",
+    options: [
+      { size: "S", price: 16000 },
+      { size: "M", price: 21000 },
+    ],
+    desc: "Bánh mì nướng giòn, bơ tỏi thơm lừng, béo mặn."
+  },
+  {
+    img: "bánh 5.png",
+    name: "Bánh Tiramisu",
+    group: "Bánh",
+    options: [
+      { size: "S", price: 18000 },
+      { size: "M", price: 24000 },
+    ],
+    desc: "Lớp kem mascarpone béo ngậy, hòa quyện vị cà phê."
+  },
+  {
+    img: "bánh 6.png",
+    name: "Bánh Su Kem",
+    group: "Bánh",
+    options: [
+      { size: "S", price: 15000 },
+      { size: "M", price: 20000 },
+    ],
+    desc: "Vỏ bánh giòn, nhân kem vani ngọt béo."
+  },
+  {
+    img: "bánh 7.png",
+    name: "Bánh Cheesecake Dâu",
+    group: "Bánh",
+    options: [
+      { size: "S", price: 20000 },
+      { size: "M", price: 25000 },
+    ],
+    desc: "Phô mai béo ngậy, topping dâu tươi chua ngọt."
+  }
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////
+             ];
 
     const IMAGE_BASE = "./";
     let cart = [];
@@ -1043,6 +1353,28 @@ function showToast(title, message){
     const configItemName = document.getElementById('config-item-name');
     const sizeRadioButtons = document.getElementById('size-radio-buttons');
     const toppingCheckboxesContainer = document.getElementById('topping-checkboxes'); // Re-declare for local scope
+// --- Toggle topping show/hide ---
+const toppingOptionsBox = document.getElementById('topping-options');
+const toppingTitle = toppingOptionsBox.querySelector('h4');
+
+// Tạo nút toggle ngay sau tiêu đề
+const toggleToppingsBtn = document.createElement('button');
+toggleToppingsBtn.id = 'toggle-toppings';
+toggleToppingsBtn.type = 'button';
+toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
+toppingTitle.after(toggleToppingsBtn);
+
+// Mặc định ẩn topping
+toppingOptionsBox.classList.add('collapsed');
+
+// Sự kiện click toggle
+toggleToppingsBtn.addEventListener('click', () => {
+  const isCollapsed = toppingOptionsBox.classList.toggle('collapsed');
+  toggleToppingsBtn.textContent = isCollapsed 
+    ? 'Topping' 
+    : 'Topping';
+});
+
     const configNotes = document.getElementById('config-notes');
     const addToCartFinalButton = document.getElementById('add-to-cart-final-button');
     const cartModal = document.getElementById('cartModal');
@@ -1134,6 +1466,10 @@ function showToast(title, message){
           `;
           toppingCheckboxesContainer.appendChild(toppingDiv);
       });
+// --- Reset topping hiển thị khi mở modal ---
+toppingOptionsBox.classList.add('collapsed');
+toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
+
       configModal.style.display = 'block';
     }
 
