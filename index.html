@@ -1756,7 +1756,10 @@ auth.onAuthStateChanged(user => {
             unsubscribe();
         }
 
-        unsubscribe = collection.orderBy("timestamp", "desc").onSnapshot(snapshot => {
+       // unsubscribe = collection.orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        unsubscribe = collection.where('completed', '==', false).orderBy("timestamp", "desc").onSnapshot(snapshot => {
+
+			
             if (snapshot.empty) {
                 orderList.innerHTML = 'Không có đơn hàng nào.';
                 totalOrdersCountEl.textContent = '0';
@@ -1987,6 +1990,7 @@ function subscribeMenu() {
 <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
+
 
 
 
