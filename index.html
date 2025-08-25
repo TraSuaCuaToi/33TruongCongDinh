@@ -41,12 +41,12 @@
 }
 
     .header button {
-      padding: 7px 10px;
+      padding: 5px 10px;
       border: none;
       background: #ffe4e9;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 0.7rem;
     }
     .header button:hover {
       background: #e63946;
@@ -68,13 +68,13 @@
     }
     .store-name-main {
       font-family: 'Dancing Script', cursive;
-      font-size: 3rem;
+      font-size: 3rem;  /*tên quán */
       color: #8e44ad;
       margin: 0;
       line-height: 1.2;
     }
     .store-address {
-      font-size: 1.2rem;
+      font-size: 1.2rem;/*địa chỉ quán */
       margin-top: 5px;
       color: #555;
     }
@@ -150,7 +150,7 @@
 
     /* Main content area */
     .main {
-      padding: 20px;
+      padding: 10px;  /* menu */
       flex-grow: 1;
       display: flex;
       flex-direction: column;
@@ -328,7 +328,7 @@
     .modal-content button {
       background-color: #2196f3;
       color: white;
-      padding: 12px 20px;
+      padding: 5px 7px;
       margin: 8px 0;
       border: none;
       cursor: pointer;
@@ -535,7 +535,7 @@
     }
     .order-stats-item strong {
       display: block;
-      font-size: 1.5em;
+      font-size: 1.1em;
     }
     .delete-all-orders-btn {
       background-color: #f44336;
@@ -596,9 +596,9 @@
   padding: 8px;
   border-bottom: 1px solid #eee;
 }
-#menu-admin-list .admin-row .title { font-weight: 600; }
+#menu-admin-list .admin-row .title { font-weight: 200; }
 #menu-admin-list .admin-row button {
-  padding: 6px 10px;
+  padding: 6px 5px;
   border: 0;
   border-radius: 6px;
   color: #fff;
@@ -607,7 +607,7 @@
 .btn-edit { background: #2196f3; }
 .btn-delete { background: #f44336; }
 
-#mf-options .opt-row { display: flex; gap: 8px; margin-bottom: 6px; }
+#mf-options .opt-row { display: flex; gap: 4px; margin-bottom: 3px; }
 #mf-options .opt-row input { width: 100%; }
 #mf-options .opt-row .opt-del {
   background: #f44336;
@@ -621,15 +621,41 @@
 #manageMenuModal .modal-content {
   width: 30% !important;       /* trên PC: chiếm 30% màn hình */
   max-width: 30% !important;
-  max-height: 65vh;
+  max-height: 75vh;
   overflow-y: auto;
   margin: 40px auto !important;
 }
 
+#manageMenuModal input[type="number"] {
+  font-size: 0.9rem;
+  padding: 5px;
+height: 20px;
+  width: 200px; /* Điều chỉnh chiều rộng của ô */
+}
+
+#manageMenuModal button {
+
+  font-size: 0.9rem;
+}
+/* Thu nhỏ chữ trong các ô input */
+#manageMenuModal input[type="text"] {
+    font-size: 0.9rem;
+    padding: 5px;
+    height: 20px; /* Thêm dòng này để giảm chiều cao của ô */
+}
+
+/* Thu nhỏ chữ của nhãn (label) nếu có */
+#manageMenuModal label {
+    font-size: 0.9rem;
+}
+
+#manageMenuModal h2 {
+  font-size: 0.9rem;
+}
 @media (max-width: 600px) {
   #manageMenuModal .modal-content {
-    width: 90% !important;     /* trên mobile: chiếm 90% màn hình */
-    max-width: 90% !important;
+    width: 70% !important;     /* trên mobile: chiếm 90% màn hình */
+    max-width: 70% !important;
   }
 }
 
@@ -1957,15 +1983,10 @@ function subscribeMenu() {
     console.error("Lỗi khi đọc menu:", err);
   });
 }
-
-
-
 </script>
-
 <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
-
 
 
 
