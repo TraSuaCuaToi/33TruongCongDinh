@@ -1678,49 +1678,50 @@ if (!orderData.accepted && !orderData.completed) {
     });
 
     // Listen for auth state changes
-    auth.onAuthStateChanged(user => {
-      if (user) {
+auth.onAuthStateChanged(user => {
+    // Menu luôn hiển thị
+    subscribeMenu(); // menu vẫn hiển thị ngay cả khi chưa đăng nhập
+
+    if (user) {
         authStatus.textContent = `Chào mừng, ${user.email}!`;
         loginForm.style.display = 'none';
         userActionsDiv.style.display = 'block';
         userEmailDisplay.textContent = user.email;
-        orderListContainer.style.display = 'block';
-        
-        // Show user email in the header
-        // chỉ lấy phần trước @
+        orderListContainer.style.display = 'block'; // show orders khi đăng nhập
         userEmailHeader.textContent = "Tài khoản: " + user.email.split('@')[0];
         authButton.textContent = 'Quản lý tài khoản';
-        
-        // Show create user and delete button only for admin
-        if (user.email === 'admin@myapp.com') {
-          createUserBtnModal.style.display = 'block';
-          deleteAllOrdersBtn.style.display = 'block';
-        } else {
-          createUserBtnModal.style.display = 'none';
-          deleteAllOrdersBtn.style.display = 'none';
-        }
-if (manageMenuBtn) {
-  manageMenuBtn.style.display = (user.email === 'admin@myapp.com') ? 'inline-block' : 'none';
-}
-        listenForOrders(ordersCollection);
-		subscribeMenu();
 
-      } else {
+        // Admin mới thấy nút tạo user, xóa order
+        if (user.email === 'admin@myapp.com') {
+            createUserBtnModal.style.display = 'block';
+            deleteAllOrdersBtn.style.display = 'block';
+            if (manageMenuBtn) manageMenuBtn.style.display = 'inline-block';
+        } else {
+            createUserBtnModal.style.display = 'none';
+            deleteAllOrdersBtn.style.display = 'none';
+            if (manageMenuBtn) manageMenuBtn.style.display = 'none';
+        }
+
+        // Chỉ nghe order khi đã đăng nhập
+        listenForOrders(ordersCollection);
+
+    } else {
         authStatus.textContent = 'Bạn chưa đăng nhập.';
         loginForm.style.display = 'flex';
         userActionsDiv.style.display = 'none';
-        orderListContainer.style.display = 'none'; // Hide order list for non-logged-in users
-        
-        // Reset header display
+        orderListContainer.style.display = 'block'; // vẫn show order list
         userEmailHeader.textContent = '';
         authButton.textContent = 'Đăng nhập';
-        
-        if (typeof unsubscribe !== 'undefined') {
-          unsubscribe();
-        }
-if (manageMenuBtn) manageMenuBtn.style.display = 'none';
-      }
-    });
+        createUserBtnModal.style.display = 'none';
+        deleteAllOrdersBtn.style.display = 'none';
+        if (manageMenuBtn) manageMenuBtn.style.display = 'none';
+
+        // Nếu muốn, có thể hiển thị order read-only
+        // listenForOrders(ordersCollection); // gọi nhưng disable thao tác nếu chưa login
+    }
+});
+
+  
 
     let unsubscribe;
     let initialSnapshot = true;
