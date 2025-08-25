@@ -30,10 +30,11 @@
       background-color: #f8f8f8;
       padding: 10px 20px;
       display: flex;
+      flex-wrap: wrap; 
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      position: fixed; /* Fixed position */
+     
       top: 0;
       left: 0;
       z-index: 1000;
@@ -52,14 +53,14 @@
     }
     .user-email-header {
       font-weight: bold;
-      color: #e63946;
+      color: #17a2b8;
       margin-right: 15px;
     }
     
     /* Store Info Section */
     .store-info-section {
       text-align: center;
-      padding: 60px 20px 20px; /* Added padding to clear the fixed header */
+      padding: 10px 5px 5px; /* Added padding to clear the fixed header */
       background-color: #e0f7fa;
       flex-shrink: 0;
     }
@@ -618,7 +619,7 @@
 #manageMenuModal .modal-content {
   width: 30% !important;       /* trên PC: chiếm 30% màn hình */
   max-width: 30% !important;
-  max-height: 85vh;
+  max-height: 65vh;
   overflow-y: auto;
   margin: 40px auto !important;
 }
@@ -828,7 +829,7 @@
     </div>
   </div>
 <div id="manageMenuModal" class="modal">
-  <div class="modal-content" style="max-width: 720px;">
+  <div class="modal-content">
     <span class="close" data-modal="manageMenuModal">&times;</span>
     <h3>Quản lý Menu</h3>
     <div id="menu-admin-list" style="max-height: 360px; overflow-y: auto; margin-bottom: 12px;"></div>
@@ -1684,7 +1685,8 @@ if (!orderData.accepted && !orderData.completed) {
         orderListContainer.style.display = 'block';
         
         // Show user email in the header
-        userEmailHeader.textContent = user.email;
+        // chỉ lấy phần trước @
+        userEmailHeader.textContent = "Tài khoản: " + user.email.split('@')[0];
         authButton.textContent = 'Quản lý tài khoản';
         
         // Show create user and delete button only for admin
