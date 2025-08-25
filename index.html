@@ -60,7 +60,7 @@
     .store-info-section {
       text-align: center;
       padding: 60px 20px 20px; /* Added padding to clear the fixed header */
-      background-color: #ffe4e9;
+      background-color: #e0f7fa;
       flex-shrink: 0;
     }
     .store-name-main {
@@ -207,7 +207,7 @@
       margin-top: 6px;
     }
     .add-to-cart-button {
-      background-color: #e63946;
+      background-color: #2196f3;
       color: white;
       border: none;
       padding: 8px;
@@ -323,7 +323,7 @@
       width: 100%;
     }
     .modal-content button {
-      background-color: #e63946;
+      background-color: #2196f3;
       color: white;
       padding: 12px 20px;
       margin: 8px 0;
@@ -333,7 +333,7 @@
       width: 100%;
     }
     .modal-content button:hover:not(:disabled) {
-      background-color: #d42c38;
+      background-color: #1976d2;
     }
     .modal-content button:disabled {
         background-color: #ccc;
@@ -510,20 +510,7 @@
       border-top: 1px dashed #ccc;
       padding-top: 10px;
     }
-    .complete-btn {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      margin-top: 10px;
-    }
-    .complete-btn:hover {
-      background-color: #45a049;
-    }
-    
+
     /* Order statistics section */
     .order-stats-header {
       display: flex;
@@ -597,6 +584,80 @@
         border: 1px solid #ccc;
         border-radius: 4px;
     }
+/* Quản lý menu (Admin) */
+#menu-admin-list .admin-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+#menu-admin-list .admin-row .title { font-weight: 600; }
+#menu-admin-list .admin-row button {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+}
+.btn-edit { background: #2196f3; }
+.btn-delete { background: #f44336; }
+
+#mf-options .opt-row { display: flex; gap: 8px; margin-bottom: 6px; }
+#mf-options .opt-row input { width: 100%; }
+#mf-options .opt-row .opt-del {
+  background: #f44336;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0 10px;
+}
+/* Responsive modal Quản lý Menu */
+#manageMenuModal .modal-content {
+  width: 30% !important;       /* trên PC: chiếm 30% màn hình */
+  max-width: 30% !important;
+  max-height: 85vh;
+  overflow-y: auto;
+  margin: 40px auto !important;
+}
+
+@media (max-width: 600px) {
+  #manageMenuModal .modal-content {
+    width: 90% !important;     /* trên mobile: chiếm 90% màn hình */
+    max-width: 90% !important;
+  }
+}
+
+/* Scroll riêng cho danh sách món (không kéo cả modal) */
+#menu-admin-list{
+  height: 200px;     /* cố định ~200px (xuất hiện thanh cuộn sớm) */
+  overflow-y: auto;  
+  padding-right: 4px;
+}
+.accept-btn,
+.complete-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 140px !important;
+  height: 40px !important;
+  padding: 0 !important; /* bỏ padding thừa */
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  background: #28a745; 
+}
+.accept-btn[disabled],
+.complete-btn[disabled] {
+  background: #6c757d;   /* xám */
+  color: #fff;
+  cursor: default;
+}
+
+
+
 /* Toast */
 .toast-container{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:4000}
 .toast{min-width:260px;max-width:90vw;background:#111;color:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.25);padding:12px 14px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s}
@@ -621,6 +682,8 @@
         <div>
           <button id="auth-button">Đăng nhập</button>
           <button id="cart-button">Giỏ Hàng (<span id="cart-count">0</span>)</button>
+	  <button id="manage-menu-btn" style="display:none;">Quản lý menu</button>
+
         </div>
     </div>
     
@@ -742,7 +805,7 @@
       </div>
       <div>
         <label for="phone-number">5 số cuối SĐT của bạn:</label>
-        <input type="text" id="phone-number" placeholder="Ví dụ: 12345" required pattern="\d{5}" maxlength="5" title="Vui lòng nhập 5 chữ số cuối.">
+        <input type="text" id="phone-number" placeholder="" required pattern="\d{5}" maxlength="5" title="Vui lòng nhập 5 chữ số cuối.">
         <label for="notes">Ghi chú chung cho đơn hàng:</label>
         <textarea id="notes" placeholder="Ví dụ: Giao hàng vào buổi chiều..."></textarea>
       </div>
@@ -764,420 +827,37 @@
       <div id="search-results-list"></div>
     </div>
   </div>
+<div id="manageMenuModal" class="modal">
+  <div class="modal-content" style="max-width: 720px;">
+    <span class="close" data-modal="manageMenuModal">&times;</span>
+    <h3>Quản lý Menu</h3>
+    <div id="menu-admin-list" style="max-height: 360px; overflow-y: auto; margin-bottom: 12px;"></div>
+    <hr style="margin: 12px 0;">
+    <h4 id="menu-form-title">Thêm món mới</h4>
+    <div class="config-options">
+      <div class="option-group"><label>Tên món</label><input type="text" id="mf-name"></div>
+      <div class="option-group"><label>Nhóm(Riêng Topping phải khi đúng là Topping)</label><input type="text" id="mf-group"></div>
+      <div class="option-group"><label>Ảnh(Nhập đúng tên ảnh VD: Trà sữa 1.png)</label><input type="text" id="mf-img"></div>
+      <div class="option-group"><label>Mô tả</label><textarea id="mf-desc"></textarea></div>
+      <div class="option-group">
+        <label>Size & Giá</label>
+        <div id="mf-options"></div>
+        <button type="button" id="mf-add-option">+ Thêm size</button>
+      </div>
+      <div class="option-group" style="display:flex;gap:10px;">
+        <button type="button" id="mf-save">Lưu</button>
+        <button type="button" id="mf-cancel">Hủy</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
 
   <script>
-    const MENU = [
-//////////////////////////////////////////////////////////////////
-
-  {
-    img: "Trà sữa 1.png",
-    name: "Trà Sữa Dâu",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 22000 },
-      { size: "L", price: 27000 },
-      { size: "XL", price: 32000 },
-    ],
-    desc: "Trà sữa dâu thơm ngọt, kết hợp trân châu đen.\nHương vị tươi mới, phù hợp giới trẻ."
-  },
-  {
-    img: "Trà sữa 2.png",
-    name: "Trà Sữa Socola",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 25000 },
-      { size: "L", price: 30000 },
-      { size: "XL", price: 34000 },
-    ],
-    desc: "Hương vị socola đậm đà hòa quyện cùng trà sữa.\nNgọt ngào và béo ngậy."
-  },
-  {
-    img: "Trà sữa 3.png",
-    name: "Trà Sữa Matcha",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 23000 },
-      { size: "L", price: 28000 },
-      { size: "XL", price: 33000 },
-    ],
-    desc: "Matcha thơm nhẹ, vị đăng đắng kết hợp sữa ngọt.\nThanh mát, giúp tỉnh táo."
-  },
-  {
-    img: "Trà sữa 4.png",
-    name: "Trà Sữa Truyền Thống",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 20000 },
-      { size: "L", price: 25000 },
-      { size: "XL", price: 30000 },
-    ],
-    desc: "Trà sữa truyền thống kèm trân châu đen.\nNgon ngọt, dễ uống, phù hợp mọi lứa tuổi."
-  },
-  {
-    img: "Trà sữa 5.png",
-    name: "Trà Sữa Khoai Môn",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 24000 },
-      { size: "L", price: 29000 },
-      { size: "XL", price: 34000 },
-    ],
-    desc: "Khoai môn bùi béo kết hợp trà sữa thơm lừng.\nĐặc trưng và độc đáo."
-  },
-  {
-    img: "Trà sữa 6.png",
-    name: "Trà Sữa Thái Xanh",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 22000 },
-      { size: "L", price: 27000 },
-      { size: "XL", price: 32000 },
-    ],
-    desc: "Trà xanh Thái thơm mát hòa quyện cùng sữa.\nGiải nhiệt, dễ uống."
-  },
-  {
-    img: "Trà sữa 7.png",
-    name: "Trà Sữa Thái Đỏ",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 21000 },
-      { size: "L", price: 26000 },
-      { size: "XL", price: 31000 },
-    ],
-    desc: "Trà đỏ Thái vị đậm, màu sắc bắt mắt.\nPhù hợp người thích vị lạ."
-  },
-  {
-    img: "Trà sữa 8.png",
-    name: "Trà Sữa Oolong",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 25000 },
-      { size: "L", price: 30000 },
-      { size: "XL", price: 35000 },
-    ],
-    desc: "Trà Oolong thơm dịu, ít đắng.\nTốt cho sức khỏe và tinh thần."
-  },
-  {
-    img: "Trà sữa 9.png",
-    name: "Trà Sữa Caramel",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 23000 },
-      { size: "L", price: 28000 },
-      { size: "XL", price: 33000 },
-    ],
-    desc: "Caramel ngọt béo kết hợp cùng trà sữa.\nNgọt ngào, thơm lừng."
-  },
-  {
-    img: "Trà sữa 10.png",
-    name: "Trà Sữa Phô Mai",
-    group: "Trà Sữa",
-    options: [
-      { size: "M", price: 26000 },
-      { size: "L", price: 31000 },
-      { size: "XL", price: 35000 },
-    ],
-    desc: "Kem phô mai béo mặn hòa quyện trà sữa.\nLạ miệng và hấp dẫn."
-  },
-  {
-    img: "Tea 1.png",
-    name: "Trà Đào Cam Sả",
-    group: "Trà",
-    options: [
-      { size: "M", price: 22000 },
-      { size: "L", price: 27000 },
-      { size: "XL", price: 30000 },
-    ],
-    desc: "Trà đào ngọt thanh, kết hợp cam tươi và sả thơm.\nMát lạnh, giải khát cực tốt."
-  },
-  {
-    img: "Tea 2.png",
-    name: "Trà Chanh Tươi",
-    group: "Trà",
-    options: [
-      { size: "M", price: 20000 },
-      { size: "L", price: 25000 },
-      { size: "XL", price: 28000 },
-    ],
-    desc: "Trà chanh truyền thống, vị chua ngọt hài hòa.\nThức uống quen thuộc, dễ uống."
-  },
-  {
-    img: "Tea 3.png",
-    name: "Trà Vải Hoa Hồng",
-    group: "Trà",
-    options: [
-      { size: "M", price: 24000 },
-      { size: "L", price: 28000 },
-      { size: "XL", price: 32000 },
-    ],
-    desc: "Sự kết hợp độc đáo giữa vải ngọt và hoa hồng thơm dịu.\nThích hợp cho người yêu vị ngọt thanh."
-  },
-  {
-    img: "Tea 4.png",
-    name: "Trà Tắc Mật Ong",
-    group: "Trà",
-    options: [
-      { size: "M", price: 21000 },
-      { size: "L", price: 26000 },
-      { size: "XL", price: 30000 },
-    ],
-    desc: "Trà tắc chua nhẹ hòa quyện cùng mật ong ngọt dịu.\nTăng đề kháng, tốt cho sức khỏe."
-  },
-  {
-    img: "Tea 5.png",
-    name: "Trà Dâu Tây",
-    group: "Trà",
-    options: [
-      { size: "M", price: 23000 },
-      { size: "L", price: 27000 },
-      { size: "XL", price: 31000 },
-    ],
-    desc: "Dâu tây tươi kết hợp cùng trà thanh mát.\nVị ngọt dịu, thơm ngon."
-  },
-  {
-    img: "Tea 6.png",
-    name: "Trà Táo Bạc Hà",
-    group: "Trà",
-    options: [
-      { size: "M", price: 25000 },
-      { size: "L", price: 29000 },
-      { size: "XL", price: 32000 },
-    ],
-    desc: "Táo tươi giòn ngọt hòa cùng vị mát lạnh bạc hà.\nThức uống sảng khoái."
-  },
-  {
-    img: "Tea 7.png",
-    name: "Trà Xoài Nhiệt Đới",
-    group: "Trà",
-    options: [
-      { size: "M", price: 22000 },
-      { size: "L", price: 26000 },
-      { size: "XL", price: 30000 },
-    ],
-    desc: "Trà xoài chua ngọt tự nhiên.\nHương vị nhiệt đới hấp dẫn."
-  },
-  {
-    img: "Tea 8.png",
-    name: "Trà Dứa Gừng",
-    group: "Trà",
-    options: [
-      { size: "M", price: 20000 },
-      { size: "L", price: 25000 },
-      { size: "XL", price: 28000 },
-    ],
-    desc: "Dứa chua ngọt hòa cùng gừng cay nồng.\nGiúp ấm bụng và tốt cho tiêu hóa."
-  },
-  {
-    img: "Tea 9.png",
-    name: "Trà Chanh Dây",
-    group: "Trà",
-    options: [
-      { size: "M", price: 23000 },
-      { size: "L", price: 27000 },
-      { size: "XL", price: 31000 },
-    ],
-    desc: "Chanh dây chua ngọt kết hợp trà xanh.\nGiàu vitamin C, tươi mát sảng khoái."
-  },
-  {
-    img: "Tea 10.png",
-    name: "Trà Hạt Sen",
-    group: "Trà",
-    options: [
-      { size: "M", price: 24000 },
-      { size: "L", price: 28000 },
-      { size: "XL", price: 32000 },
-    ],
-    desc: "Hạt sen bùi thơm kết hợp cùng trà thanh khiết.\nThanh tịnh, nhẹ nhàng."
-  },
-
-  {
-    img: "Topping 1.png",
-    name: "Trân Châu Đen",
-    group: "Topping",
-    options: [{ size: "", price: 6000 }],
-    desc: "Trân châu đen dẻo thơm."
-  },
-  {
-    img: "Topping 2.png",
-    name: "Trân Châu Trắng",
-    group: "Topping",
-    options: [{ size: "", price: 7000 }],
-    desc: "Hạt giòn dai, vị thanh."
-  },
-  {
-    img: "Topping 3.png",
-    name: "Pudding Trứng",
-    group: "Topping",
-    options: [{ size: "", price: 9000 }],
-    desc: "Mềm mịn, béo nhẹ."
-  },
-  {
-    img: "Topping 4.png",
-    name: "Pudding Socola",
-    group: "Topping",
-    options: [{ size: "", price: 10000 }],
-    desc: "Đậm vị socola."
-  },
-  {
-    img: "Topping 5.png",
-    name: "Pudding Matcha",
-    group: "Topping",
-    options: [{ size: "", price: 10000 }],
-    desc: "Hậu vị matcha thanh."
-  },
-  {
-    img: "Topping 6.png",
-    name: "Thạch Phô Mai",
-    group: "Topping",
-    options: [{ size: "", price: 9000 }],
-    desc: "Thạch dai, vị phô mai béo."
-  },
-  {
-    img: "Topping 7.png",
-    name: "Thạch Trái Cây",
-    group: "Topping",
-    options: [{ size: "", price: 7000 }],
-    desc: "Nhiều hương trái cây."
-  },
-  {
-    img: "Topping 8.png",
-    name: "Thạch Dừa",
-    group: "Topping",
-    options: [{ size: "", price: 6000 }],
-    desc: "Giòn nhẹ, mát miệng."
-  },
-  {
-    img: "Topping 9.png",
-    name: "Thạch Cà Phê",
-    group: "Topping",
-    options: [{ size: "", price: 7000 }],
-    desc: "Hương cà phê nhẹ."
-  },
-  {
-    img: "Topping 10.png",
-    name: "Nha Đam",
-    group: "Topping",
-    options: [{ size: "", price: 7000 }],
-    desc: "Miếng nha đam mát."
-  },
-  {
-    img: "Topping 11.png",
-    name: "Hạt Thủy Tinh Chanh Dây",
-    group: "Topping",
-    options: [{ size: "", price: 9000 }],
-    desc: "Nổ vui miệng, chua ngọt."
-  },
-  {
-    img: "Topping 12.png",
-    name: "Kem Cheese",
-    group: "Topping",
-    options: [{ size: "", price: 10000 }],
-    desc: "Lớp kem mặn ngọt béo."
-  },
-  {
-    img: "Topping 13.png",
-    name: "Flan Caramel",
-    group: "Topping",
-    options: [{ size: "", price: 10000 }],
-    desc: "Ngậy thơm caramel."
-  },
-  {
-    img: "Topping 14.png",
-    name: "Hạt Sen",
-    group: "Topping",
-    options: [{ size: "", price: 9000 }],
-    desc: "Bùi, thơm nhẹ."
-  },
-  {
-    img: "Topping 15.png",
-    name: "Đậu Đỏ",
-    group: "Topping",
-    options: [{ size: "", price: 8000 }],
-    desc: "Bé o bùi, ngọt vừa."
-  },
-  {
-    img: "Bánh 1.png",
-    name: "Bánh Bông Lan Trứng Muối",
-    group: "Bánh",
-    options: [
-      { size: "S", price: 15000 },
-      { size: "M", price: 20000 },
-    ],
-    desc: "Bánh mềm xốp, trứng muối béo mặn, sốt bơ thơm ngậy."
-  },
-  {
-    img: "Bánh 2.png",
-    name: "Bánh Mousse Socola",
-    group: "Bánh",
-    options: [
-      { size: "S", price: 17000 },
-      { size: "M", price: 22000 },
-    ],
-    desc: "Mousse socola ngọt đậm, tan ngay khi ăn."
-  },
-  {
-    img: "Bánh 3.png",
-    name: "Bánh Flan",
-    group: "Bánh",
-    options: [
-      { size: "S", price: 15000 },
-      { size: "M", price: 20000 },
-    ],
-    desc: "Bánh flan caramel mềm mịn, ngọt béo vừa đủ."
-  },
-  {
-    img: "Bánh 4.png",
-    name: "Bánh Mì Bơ Tỏi",
-    group: "Bánh",
-    options: [
-      { size: "S", price: 16000 },
-      { size: "M", price: 21000 },
-    ],
-    desc: "Bánh mì nướng giòn, bơ tỏi thơm lừng, béo mặn."
-  },
-  {
-    img: "Bánh 5.png",
-    name: "Bánh Tiramisu",
-    group: "Bánh",
-    options: [
-      { size: "S", price: 18000 },
-      { size: "M", price: 24000 },
-    ],
-    desc: "Lớp kem mascarpone béo ngậy, hòa quyện vị cà phê."
-  },
-  {
-    img: "Bánh 6.png",
-    name: "Bánh Su Kem",
-    group: "Bánh",
-    options: [
-      { size: "S", price: 15000 },
-      { size: "M", price: 20000 },
-    ],
-    desc: "Vỏ bánh giòn, nhân kem vani ngọt béo."
-  },
-  {
-    img: "Bánh 7.png",
-    name: "Bánh Cheesecake Dâu",
-    group: "Bánh",
-    options: [
-      { size: "S", price: 20000 },
-      { size: "M", price: 25000 },
-    ],
-    desc: "Phô mai béo ngậy, topping dâu tươi chua ngọt."
-  }
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////
-             ];
-
+    let MENU = [];
     const IMAGE_BASE = "./";
     let cart = [];
     let currentConfigItem = null;
@@ -1330,7 +1010,7 @@ function showToast(title, message){
     const auth = firebase.auth();
     const db = firebase.firestore();
     const ordersCollection = db.collection('orders');
-
+    const menuCollection = db.collection('menu');
     const authModal = document.getElementById('authModal');
     const authStatus = document.getElementById('auth-status');
     const authSection = document.getElementById('auth-section');
@@ -1353,6 +1033,22 @@ function showToast(title, message){
     const configItemName = document.getElementById('config-item-name');
     const sizeRadioButtons = document.getElementById('size-radio-buttons');
     const toppingCheckboxesContainer = document.getElementById('topping-checkboxes'); // Re-declare for local scope
+// ==== Quản lý menu (Admin) ====
+const manageMenuBtn = document.getElementById('manage-menu-btn');
+const manageMenuModal = document.getElementById('manageMenuModal');
+const menuAdminList = document.getElementById('menu-admin-list');
+const mfName = document.getElementById('mf-name');
+const mfGroup = document.getElementById('mf-group');
+const mfImg = document.getElementById('mf-img');
+const mfDesc = document.getElementById('mf-desc');
+const mfOptions = document.getElementById('mf-options');
+const mfAddOption = document.getElementById('mf-add-option');
+const mfSave = document.getElementById('mf-save');
+const mfCancel = document.getElementById('mf-cancel');
+const menuFormTitle = document.getElementById('menu-form-title');
+
+let editingId = null;
+
 // --- Toggle topping show/hide ---
 const toppingOptionsBox = document.getElementById('topping-options');
 const toppingTitle = toppingOptionsBox.querySelector('h4');
@@ -1405,6 +1101,128 @@ toggleToppingsBtn.addEventListener('click', () => {
       renderCart();
       cartModal.style.display = 'block';
     });
+// Open manage menu modal (Admin)
+if (manageMenuBtn) {
+  manageMenuBtn.addEventListener('click', () => {
+    openManageMenu();
+  });
+}
+function openManageMenu() {
+  renderAdminMenuList();
+  clearMenuForm();
+  manageMenuModal.style.display = 'block';
+}
+
+function renderAdminMenuList() {
+  if (!MENU.length) {
+    menuAdminList.innerHTML = '<p>Chưa có món nào.</p>';
+    return;
+  }
+  menuAdminList.innerHTML = '';
+  MENU.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'admin-row';
+    row.innerHTML = `
+      <div class="title">${item.name} <span style="color:#777;font-weight:400;">(${item.group})</span></div>
+      <button class="btn-edit">Sửa</button>
+      <button class="btn-delete">Xóa</button>
+    `;
+    row.querySelector('.btn-edit').onclick = () => fillMenuForm(item);
+    row.querySelector('.btn-delete').onclick = () => deleteMenuItem(item.id, item.name);
+    menuAdminList.appendChild(row);
+  });
+}
+function clearMenuForm() {
+  editingId = null;
+  menuFormTitle.textContent = 'Thêm món mới';
+  mfName.value = '';
+  mfGroup.value = '';
+  mfImg.value = '';
+  mfDesc.value = '';
+  mfOptions.innerHTML = '';
+  // gợi ý sẵn 3 size phổ biến
+  ['M', 'L', 'XL'].forEach(s => addOptionRow(s, ''));
+}
+
+function fillMenuForm(item) {
+  editingId = item.id;
+  menuFormTitle.textContent = 'Sửa món';
+  mfName.value = item.name || '';
+  mfGroup.value = item.group || '';
+  mfImg.value = item.img || '';
+  mfDesc.value = item.desc || '';
+  mfOptions.innerHTML = '';
+  (item.options || []).forEach(opt => addOptionRow(opt.size || '', opt.price || ''));
+  if ((item.options || []).length === 0) addOptionRow('', '');
+  manageMenuModal.scrollTop = 0;
+}
+
+function addOptionRow(sizeVal, priceVal) {
+  const row = document.createElement('div');
+  row.className = 'opt-row';
+  row.innerHTML = `
+    <input type="text" class="opt-size" placeholder="Size (M/L/XL; để trống nếu là Topping)" value="${sizeVal ?? ''}">
+    <input type="number" class="opt-price" placeholder="Giá (đồng)" value="${priceVal ?? ''}">
+    <button type="button" class="opt-del">&times;</button>
+  `;
+  row.querySelector('.opt-del').onclick = () => row.remove();
+  mfOptions.appendChild(row);
+}
+
+mfAddOption.addEventListener('click', () => addOptionRow('', ''));
+mfCancel.addEventListener('click', clearMenuForm);
+// Lưu (thêm mới hoặc cập nhật món)
+mfSave.addEventListener('click', async () => {
+  const name = mfName.value.trim();
+  const group = mfGroup.value.trim();
+  const img = mfImg.value.trim();
+  const desc = mfDesc.value.trim();
+  const opts = [...mfOptions.querySelectorAll('.opt-row')].map(r => ({
+    size: r.querySelector('.opt-size').value.trim(),
+    price: Number(r.querySelector('.opt-price').value)
+  })).filter(o => !isNaN(o.price) && o.price > 0);
+
+  if (!name || !group || !img || opts.length === 0) {
+    showCustomAlert('Vui lòng nhập đủ Tên, Nhóm, Ảnh và ít nhất 1 size & giá hợp lệ.');
+    return;
+  }
+
+  const payload = {
+    name, group, img, desc,
+    options: opts,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+
+  try {
+    if (editingId) {
+      await menuCollection.doc(editingId).set(payload, { merge: true });
+      showCustomAlert('Đã cập nhật món.');
+    } else {
+      await menuCollection.add({
+        ...payload,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      showCustomAlert('Đã thêm món mới.');
+    }
+    clearMenuForm();
+  } catch (e) {
+    console.error(e);
+    showCustomAlert('Lưu món thất bại, vui lòng thử lại.');
+  }
+});
+
+// Xóa món
+async function deleteMenuItem(id, name) {
+  if (!confirm(`Xóa món "${name}"?`)) return;
+  try {
+    await menuCollection.doc(id).delete();
+    showCustomAlert('Đã xóa món.');
+    renderAdminMenuList();
+  } catch (e) {
+    console.error(e);
+    showCustomAlert('Xóa món thất bại.');
+  }
+}
 
     // Toggle sidebar
     menuToggleBtn.addEventListener('click', () => {
@@ -1658,7 +1476,7 @@ toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
                     orderDiv.style.backgroundColor = orderData.completed ? '#f0f0f0' : '#ffe4e9';
                     
                     const statusText = orderData.completed ? 'ĐÃ HOÀN THÀNH' : 'CHƯA HOÀN THÀNH';
-                    
+                 
                     let itemsHTML = '';
                     let orderTotalPrice = 0;
                     orderData.items.forEach(item => {
@@ -1688,6 +1506,28 @@ toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
                         <div style="font-weight: bold; margin-top: 10px;">Tổng cộng: ${orderTotalPrice.toLocaleString('vi-VN')}₫</div>
                         <p style="font-weight: bold; color: ${orderData.completed ? '#4CAF50' : '#e63946'}; font-size: 1.1em; margin-top: 10px;">Trạng thái: ${statusText}</p>
                     `;
+// >>> THÊM Ở ĐÂY <<<
+if (!orderData.accepted && !orderData.completed) {
+  const cancelBtn = document.createElement('button');
+  cancelBtn.id = 'cancel-order-btn';
+  cancelBtn.className = 'btn btn-danger';
+  cancelBtn.textContent = 'Hủy đơn';
+  cancelBtn.style.marginTop = '10px';
+
+  cancelBtn.addEventListener('click', async () => {
+    try {
+      await ordersCollection.doc(doc.id).delete();
+      showCustomAlert('Đã hủy đơn.');
+      searchResultModal.style.display = 'none';
+    } catch (e) {
+      console.error(e);
+      showCustomAlert('Hủy đơn thất bại. Vui lòng thử lại.');
+    }
+  });
+
+  orderDiv.appendChild(cancelBtn);
+}
+
                     searchResultsList.appendChild(orderDiv);
                 });
             }
@@ -1855,7 +1695,11 @@ toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
           createUserBtnModal.style.display = 'none';
           deleteAllOrdersBtn.style.display = 'none';
         }
+if (manageMenuBtn) {
+  manageMenuBtn.style.display = (user.email === 'admin@myapp.com') ? 'inline-block' : 'none';
+}
         listenForOrders(ordersCollection);
+		subscribeMenu();
 
       } else {
         authStatus.textContent = 'Bạn chưa đăng nhập.';
@@ -1870,6 +1714,7 @@ toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
         if (typeof unsubscribe !== 'undefined') {
           unsubscribe();
         }
+if (manageMenuBtn) manageMenuBtn.style.display = 'none';
       }
     });
 
@@ -1939,14 +1784,27 @@ toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
                 
                 const timestamp = orderData.timestamp ? orderData.timestamp.toDate().toLocaleString('vi-VN') : 'Đang cập nhật...';
 
-                orderCard.innerHTML = `
-                    <h4>Đơn hàng của khách ${orderData.phoneNumber}</h4>
-                    <div>${itemsHTML}</div>
-                    <div style="font-weight: bold; margin-top: 10px;">Tổng cộng: ${orderTotalPrice.toLocaleString('vi-VN')}₫</div>
-                    ${orderData.notes ? `<div>Ghi chú chung: ${orderData.notes}</div>` : ''}
-                    <div class="order-meta">Thời gian: ${timestamp}</div>
-                    <button class="complete-btn">${orderData.completed ? 'Đã hoàn thành' : 'Đánh dấu đã xong'}</button>
-                `;
+               orderCard.innerHTML = `
+  <h4>Đơn hàng của khách ${orderData.phoneNumber}</h4>
+  <div>${itemsHTML}</div>
+  <div style="font-weight: bold; margin-top: 10px;">
+    Tổng cộng: ${orderTotalPrice.toLocaleString('vi-VN')}₫
+  </div>
+  ${orderData.notes ? `<div>Ghi chú chung: ${orderData.notes}</div>` : ''}
+  <div class="order-meta">Thời gian: ${timestamp}</div>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+    <button class="accept-btn" ${orderData.accepted ? 'disabled' : ''}>
+      ${orderData.accepted ? 'ĐÃ NHẬN ĐƠN' : 'Nhận đơn'}
+    </button>
+    <button class="complete-btn" ${orderData.completed ? 'disabled' : ''}>
+      ${orderData.completed ? 'Đã hoàn thành' : 'Đánh dấu đã xong'}
+    </button>
+  </div>
+`;
+
+             
+
                 orderList.appendChild(orderCard);
             });
             
@@ -1959,6 +1817,10 @@ toggleToppingsBtn.textContent = 'Hiện topping (bấm để mở)';
             document.querySelectorAll('.complete-btn').forEach(btn => {
                 btn.addEventListener('click', toggleOrderCompleted);
             });
+document.querySelectorAll('.accept-btn').forEach(btn => {
+  btn.addEventListener('click', acceptOrder);
+});
+
 // Thông báo khi có document mới (không báo lần đầu)
 const added = snapshot.docChanges().filter(c => c.type === 'added');
 if (!initialSnapshot && added.length) {
@@ -1999,6 +1861,36 @@ initialSnapshot = false;
         showCustomAlert("Có lỗi xảy ra khi cập nhật trạng thái.");
       }
     }
+async function acceptOrder(e) {
+  const orderCard = e.target.closest('.order-card');
+  const orderId = orderCard.dataset.id;
+  const docRef = ordersCollection.doc(orderId);
+
+  try {
+    const snap = await docRef.get();
+    if (snap.exists) {
+      const data = snap.data();
+      // Nếu đã hoàn thành thì không cần nhận nữa
+      if (data.completed) {
+        showCustomAlert('Đơn đã hoàn thành.');
+        return;
+      }
+      // Nếu đã nhận rồi thì bỏ qua
+      if (data.accepted) {
+        showCustomAlert('Đơn này đã được nhận.');
+        return;
+      }
+      await docRef.update({
+        accepted: true,
+        acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showCustomAlert('Đã nhận đơn!');
+    }
+  } catch (err) {
+    console.error(err);
+    showCustomAlert('Lỗi khi nhận đơn. Vui lòng thử lại.');
+  }
+}
 
     // Delete all orders
     deleteAllOrdersBtn.addEventListener('click', async () => {
@@ -2024,9 +1916,48 @@ initialSnapshot = false;
             }
         }
     });
-  </script>
-  <div id="toast-container" class="toast-container"></div>
 
+
+// ==== Lắng nghe menu từ Firestore ====
+let unsubscribeMenu;
+function subscribeMenu() {
+  if (unsubscribeMenu) unsubscribeMenu();
+
+  unsubscribeMenu = menuCollection.onSnapshot(snapshot => {
+    MENU = [];
+    snapshot.forEach(doc => {
+      MENU.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Render lại nhóm bên sidebar
+    groupList.innerHTML = '';
+    const groups = [...new Set(MENU.map(item => item.group))];
+    groups.forEach(group => {
+      const btn = document.createElement("button");
+      btn.textContent = group;
+      btn.onclick = () => {
+        renderMenu(group);
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+      };
+      groupList.appendChild(btn);
+    });
+
+    if (groups.length > 0) {
+      renderMenu(groups[0]);
+    } else {
+      grid.innerHTML = '<p>Chưa có món nào.</p>';
+    }
+  }, err => {
+    console.error("Lỗi khi đọc menu:", err);
+  });
+}
+
+
+
+</script>
+
+<div id="toast-container" class="toast-container"></div>
 </body>
 </html>
 
